@@ -19,3 +19,19 @@ spring:
 
 server:
   port: 8080
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tpn18092004@gmail.com
+    password: umbpwzggmchajxtc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+
+  cloudinary:
+    cloud-name: dwd4b8lcx
+    api-key: 271116451416351
+    api-secret: fbyd8zzUl4OSzBFxkf4_cr4jNTk
