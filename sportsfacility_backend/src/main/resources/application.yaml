@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sportsfacility_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8
     username: root
-    password: Admin@123
+    password: Admin123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -17,21 +17,29 @@ spring:
         "[format_sql]": true
     open-in-view: false
 
-server:
-  port: 8080
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: tpn18092004@gmail.com
-    password: umbpwzggmchajxtc
+    password: gtzgsmjcdzanimek
     properties:
       mail:
         smtp:
           auth: true
-          starttls.enable: true
+          starttls:
+            enable: true
+          ssl:
+            protocols: TLSv1.2
+            trust: smtp.gmail.com
+server:
+  port: 8080
 
-  cloudinary:
-    cloud-name: dwd4b8lcx
-    api-key: 271116451416351
-    api-secret: fbyd8zzUl4OSzBFxkf4_cr4jNTk
+jwt:
+  secret: oUwfZl+T7r7+Jw5bB65zW98Mt3jzYtPClpZ3aINxqVQ=
+  expiration: 86400000 # 24 hours in milliseconds
+
+cloudinary:
+  cloud-name: dwd4b8lcx
+  api-key: 271116451416351
+  api-secret: fbyd8zzUl4OSzBFxkf4_cr4jNTk
