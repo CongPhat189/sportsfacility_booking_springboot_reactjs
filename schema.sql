@@ -17,21 +17,34 @@ USE sportsfacility_db;
 -- Lưu thông tin tất cả người dùng (Customer, Owner, Admin)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS users (
-    id          BIGINT          NOT NULL AUTO_INCREMENT,
-    full_name   VARCHAR(100)    NOT NULL,
-    email       VARCHAR(150)    NOT NULL,
-    password    VARCHAR(255)    NOT NULL,
-    phone       VARCHAR(15)     NULL DEFAULT NULL,
-    avatar_url  TEXT            NULL DEFAULT NULL,
-    role        ENUM('CUSTOMER','OWNER','ADMIN') NOT NULL DEFAULT 'CUSTOMER',
-    status      ENUM('ACTIVE','INACTIVE','LOCKED') NOT NULL DEFAULT 'INACTIVE',
-    created_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    id          		BIGINT          NOT NULL AUTO_INCREMENT,
+    full_name   		VARCHAR(100)    NOT NULL,
+    email       		VARCHAR(150)    NOT NULL,
+    password    		VARCHAR(255)    NOT NULL,
+    phone       		VARCHAR(15)     NULL DEFAULT NULL,
+    avatar_url  		TEXT            NULL DEFAULT NULL,
+
+    role        		ENUM('CUSTOMER','OWNER','ADMIN') 
+						NOT NULL DEFAULT 'CUSTOMER',
+
+    status      		ENUM('ACTIVE','INACTIVE','LOCKED') 
+						NOT NULL DEFAULT 'INACTIVE',
+
+    -- email verification
+    verification_token  VARCHAR(255) NULL,
+    token_expires_at    TIMESTAMP NULL,
+    is_verified			BOOLEAN   NOT NULL default 0,	
+
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP 
+                ON UPDATE CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id),
     UNIQUE INDEX idx_email (email),
     INDEX idx_role   (role),
-    INDEX idx_status (status)
+    INDEX idx_status (status),
+    INDEX idx_verification_token (verification_token)
+
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;

@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,6 +41,15 @@ public class User {
     @Column(nullable = false, length = 10)
     private UserStatus status = UserStatus.INACTIVE;
 
+    @Column(name = "is_verified")
+    private boolean isVerified;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "token_expires_at")
+    private Timestamp tokenExpiresAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -49,10 +60,13 @@ public class User {
 
     // ==================== Constructors ====================
 
+
+
     public User() {}
 
     public User(Long id, String fullName, String email, String password, String phone,
-                String avatarUrl, Role role, UserStatus status,
+                String avatarUrl, Role role, UserStatus status, boolean isVerified,
+                String verificationToken, Timestamp tokenExpiresAt,
                 LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.fullName = fullName;
@@ -62,6 +76,9 @@ public class User {
         this.avatarUrl = avatarUrl;
         this.role = role;
         this.status = status;
+        this.isVerified = isVerified;
+        this.verificationToken = verificationToken;
+        this.tokenExpiresAt = tokenExpiresAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -84,6 +101,12 @@ public class User {
 
     public UserStatus getStatus() { return status; }
 
+    public boolean isVerified() { return isVerified; }
+
+    public String getVerificationToken() { return verificationToken; }
+
+    public Timestamp getTokenExpiresAt() { return tokenExpiresAt; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
@@ -105,6 +128,12 @@ public class User {
     public void setRole(Role role) { this.role = role; }
 
     public void setStatus(UserStatus status) { this.status = status; }
+
+    public void setVerified(boolean verified) { isVerified = verified; }
+
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public void setTokenExpiresAt(Timestamp tokenExpiresAt) { this.tokenExpiresAt = tokenExpiresAt; }
 
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
