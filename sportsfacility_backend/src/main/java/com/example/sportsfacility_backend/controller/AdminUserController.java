@@ -1,7 +1,7 @@
 package com.example.sportsfacility_backend.controller;
 
 import com.example.sportsfacility_backend.entity.User;
-import com.example.sportsfacility_backend.service.AdminService;
+import com.example.sportsfacility_backend.service.AdminUserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.List;
 @RequestMapping("/admin/users")
 public class AdminUserController {
 
-    private final AdminService adminService;
+    private final AdminUserService adminService;
 
-    public AdminUserController(AdminService adminService) {
+    public AdminUserController(AdminUserService adminService) {
         this.adminService = adminService;
     }
 
