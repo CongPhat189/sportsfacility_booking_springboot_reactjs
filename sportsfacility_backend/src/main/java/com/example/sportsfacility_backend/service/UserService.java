@@ -1,7 +1,9 @@
 package com.example.sportsfacility_backend.service;
 
 
+import com.example.sportsfacility_backend.dto.ChangePasswordRequest;
 import com.example.sportsfacility_backend.dto.RegisterRequest;
+import com.example.sportsfacility_backend.dto.UpdateProfileRequest;
 import com.example.sportsfacility_backend.entity.User;
 import com.example.sportsfacility_backend.entity.enums.*;
 import com.example.sportsfacility_backend.repository.UserRepository;
@@ -54,8 +56,8 @@ public class UserService {
     }
 
 
-        public void createAdmin(RegisterRequest req) {
-        if (userRepository.existsByEmail("admin@ou.edu.vn")) {
+    public void createAdmin(RegisterRequest req) {
+        if (userRepository.existsByEmail("admin@gmail.com")) {
             throw new IllegalArgumentException("Tài khoản admin đã tồn tại.");
         }
         User admin = new User();
@@ -85,6 +87,45 @@ public class UserService {
     public User getCurrentUser(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    public User updateProfile(String email, UpdateProfileRequest req) throws Exception {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        if (req.getFullName() != null) {
+            user.setFullName(req.getFullName());
+        }
+
+        if (req.getPhone() != null) {
+            user.setPhone(req.getPhone());
+        }
+
+        if (req.getAvatarUrl() != null) {
+            String avatar = cloudinaryService.uploadImage(req.getAvatarUrl());
+            user.setAvatarUrl(avatar);
+        }
+
+        return userRepository.save(user);
+    }
+
+    public String changePassword(String email, ChangePasswordRequest req) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+        if (!encoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng");
+        }
+
+        user.setPassword(encoder.encode(req.getNewPassword()));
+
+        userRepository.save(user);
+
+        return "Đổi mật khẩu thành công";
     }
 
 
