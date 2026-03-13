@@ -26,8 +26,11 @@ public class UserService {
             throw new IllegalArgumentException("Email đã được sử dụng.");
         }
 
-        // Upload avatar lên Cloudinary
-        String avatarUrl = cloudinaryService.uploadImage(req.getAvatarUrl());
+        // Upload avatar lên Cloudinary (nếu có)
+        String avatarUrl = null;
+        if (req.getAvatarUrl() != null && !req.getAvatarUrl().isEmpty()) {
+            avatarUrl = cloudinaryService.uploadImage(req.getAvatarUrl());
+        }
 
         // Tạo token xác thực
         String token = UUID.randomUUID().toString();
