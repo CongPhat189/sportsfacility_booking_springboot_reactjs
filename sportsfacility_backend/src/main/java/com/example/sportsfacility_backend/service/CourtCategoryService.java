@@ -1,5 +1,6 @@
 package com.example.sportsfacility_backend.service;
 
+import com.example.sportsfacility_backend.dto.CourtCategoryRequestDTO;
 import com.example.sportsfacility_backend.entity.CourtCategory;
 import com.example.sportsfacility_backend.repository.CourtCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,21 @@ import java.util.List;
 @Service
 public class CourtCategoryService {
 
-    @Autowired CourtCategoryRepository courtCategoryRepository;
+    @Autowired
+    private CourtCategoryRepository courtCategoryRepository;
 
     // CREATE
-    public CourtCategory createCategory(CourtCategory category) {
+    public CourtCategory createCategory(CourtCategoryRequestDTO req) {
 
-        courtCategoryRepository.findByName(category.getName())
+        courtCategoryRepository.findByName(req.getName())
                 .ifPresent(c -> {
                     throw new RuntimeException("Danh mục đã tồn tại");
                 });
+
+        CourtCategory category = new CourtCategory();
+        category.setName(req.getName());
+        category.setDescription(req.getDescription());
+        category.setIsActive(true);
 
         return courtCategoryRepository.save(category);
     }
@@ -28,21 +35,23 @@ public class CourtCategoryService {
         return courtCategoryRepository.findAll();
     }
 
-
     // UPDATE
-    public CourtCategory updateCategory(Integer id, CourtCategory req) {
+    public CourtCategory updateCategory(Integer id, CourtCategoryRequestDTO req) {
 
         CourtCategory category = courtCategoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 
         category.setName(req.getName());
         category.setDescription(req.getDescription());
-        category.setIsActive(req.getIsActive());
+
+        if (req.getIsActive() != null) {
+            category.setIsActive(req.getIsActive());
+        }
 
         return courtCategoryRepository.save(category);
     }
 
-    // DELETE (disable)
+    // DISABLE
     public CourtCategory disableCategory(Integer id) {
 
         CourtCategory category = courtCategoryRepository.findById(id)
@@ -53,6 +62,7 @@ public class CourtCategoryService {
         return courtCategoryRepository.save(category);
     }
 
+    // ENABLE
     public CourtCategory enableCategory(Integer id) {
 
         CourtCategory category = courtCategoryRepository.findById(id)

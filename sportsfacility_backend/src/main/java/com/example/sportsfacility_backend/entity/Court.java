@@ -1,6 +1,7 @@
 package com.example.sportsfacility_backend.entity;
 
 import com.example.sportsfacility_backend.entity.enums.CourtStatus;
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,6 +19,7 @@ public class Court {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
+
     private User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)

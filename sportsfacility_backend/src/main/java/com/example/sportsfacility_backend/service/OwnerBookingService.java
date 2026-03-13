@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BookingService {
+public class OwnerBookingService {
 
     private final BookingRepository bookingRepository;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public OwnerBookingService(BookingRepository bookingRepository) {
         this.bookingRepository = bookingRepository;
     }
 

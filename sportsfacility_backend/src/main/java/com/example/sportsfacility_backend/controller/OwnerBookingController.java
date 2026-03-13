@@ -2,7 +2,7 @@ package com.example.sportsfacility_backend.controller;
 
 import com.example.sportsfacility_backend.dto.BookingRequest;
 import com.example.sportsfacility_backend.dto.BookingResponse;
-import com.example.sportsfacility_backend.service.BookingService;
+import com.example.sportsfacility_backend.service.OwnerBookingService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,22 +11,22 @@ import java.util.List;
 @RequestMapping("/owner/bookings")
 public class OwnerBookingController {
 
-    private final BookingService bookingService;
+    private final OwnerBookingService ownerBookingService;
 
-    public OwnerBookingController(BookingService bookingService) {
-        this.bookingService = bookingService;
+    public OwnerBookingController(OwnerBookingService ownerBookingService) {
+        this.ownerBookingService = ownerBookingService;
     }
 
     // GET ALL
     @GetMapping
     public List<BookingResponse> getAllBookings(){
-        return bookingService.getAllBookings();
+        return ownerBookingService.getAllBookings();
     }
 
     // GET BY ID
     @GetMapping("/{id}")
     public BookingResponse getBooking(@PathVariable Long id){
-        return bookingService.getBookingById(id);
+        return ownerBookingService.getBookingById(id);
     }
 
     // UPDATE STATUS
@@ -35,14 +35,14 @@ public class OwnerBookingController {
             @PathVariable Long id,
             @RequestBody BookingRequest request){
 
-        return bookingService.updateBooking(id, request);
+        return ownerBookingService.updateBooking(id, request);
     }
 
     // DELETE
     @DeleteMapping("/{id}")
     public String deleteBooking(@PathVariable Long id){
 
-        bookingService.deleteBooking(id);
+        ownerBookingService.deleteBooking(id);
 
         return "Booking deleted";
     }

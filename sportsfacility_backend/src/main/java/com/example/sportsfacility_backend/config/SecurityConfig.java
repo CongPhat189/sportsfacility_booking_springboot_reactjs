@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/register/**", "/auth/login", "/auth/verify", "/ws/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/owner/**").hasRole("OWNER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

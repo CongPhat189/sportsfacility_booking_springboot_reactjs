@@ -1,9 +1,10 @@
 package com.example.sportsfacility_backend.controller;
 
+import com.example.sportsfacility_backend.dto.CourtResponseDTO;
 import com.example.sportsfacility_backend.dto.RejectCourtRequest;
-import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.service.AdminCourtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,20 +18,24 @@ public class AdminCourtController {
 
     // Lấy danh sách sân chờ duyệt
     @GetMapping("/pending")
-    public List<Court> getPendingCourts() {
-        return adminCourtService.getPendingCourts();
+    public ResponseEntity<List<CourtResponseDTO>> getPendingCourts() {
+        return ResponseEntity.ok(adminCourtService.getPendingCourts());
     }
 
     // Duyệt sân
     @PutMapping("/{id}/approve")
-    public Court approveCourt(@PathVariable Integer id) {
-        return adminCourtService.approveCourt(id);
+    public ResponseEntity<CourtResponseDTO> approveCourt(@PathVariable Long id) {
+        return ResponseEntity.ok(adminCourtService.approveCourt(id));
     }
 
+    // Từ chối sân
     @PutMapping("/{id}/reject")
-    public Court rejectCourt(@PathVariable Integer id,
-                             @RequestBody RejectCourtRequest request) {
+    public ResponseEntity<CourtResponseDTO> rejectCourt(
+            @PathVariable Long id,
+            @RequestBody RejectCourtRequest request) {
 
-        return adminCourtService.rejectCourt(id, request.getRejectReason());
+        return ResponseEntity.ok(
+                adminCourtService.rejectCourt(id, request.getRejectReason())
+        );
     }
 }

@@ -23,10 +23,16 @@ public class CourtService {
     @Autowired
     private CourtRepository courtRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired CourtCategoryRepository categoryRepository;
+
+
     @Transactional
     public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId) {
         return courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
-
+                .stream()
                 .map(CourtResponseDTO::new)
                 .toList();
     }

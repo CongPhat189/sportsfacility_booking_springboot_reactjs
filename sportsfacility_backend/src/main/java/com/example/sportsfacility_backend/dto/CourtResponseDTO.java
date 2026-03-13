@@ -19,6 +19,7 @@ public class CourtResponseDTO {
     private String imageUrl;
     private BigDecimal commissionRate;
     private CourtStatus status;
+    private String rejectReason;
     private LocalDateTime createdAt;
 
     public CourtResponseDTO(Court court) {
@@ -33,6 +34,7 @@ public class CourtResponseDTO {
         this.imageUrl = court.getImageUrl();
         this.commissionRate = court.getCommissionRate();
         this.status = court.getStatus();
+        this.rejectReason = court.getRejectReason();
         this.createdAt = court.getCreatedAt();
     }
 
@@ -47,5 +49,6 @@ public class CourtResponseDTO {
     public String getImageUrl() { return imageUrl; }
     public BigDecimal getCommissionRate() { return commissionRate; }
     public CourtStatus getStatus() { return status; }
+    public String getRejectReason() { return rejectReason; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
