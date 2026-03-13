@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class AdminService {
+public class AdminUserService {
 
     private final UserRepository userRepository;
 
-    public AdminService(UserRepository userRepository) {
+    public AdminUserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

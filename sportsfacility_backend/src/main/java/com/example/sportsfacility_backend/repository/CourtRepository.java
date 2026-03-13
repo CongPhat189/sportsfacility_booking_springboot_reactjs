@@ -11,6 +11,7 @@ import java.util.List;
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
     List<Court> findByOwnerId(Long ownerId);
+    List<Court> findByStatus(CourtStatus status);
 
     @Query("SELECT c FROM Court c WHERE c.status = :status " +
            "AND (:keyword IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
