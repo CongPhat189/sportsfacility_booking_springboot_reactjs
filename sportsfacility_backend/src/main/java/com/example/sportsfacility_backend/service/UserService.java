@@ -51,8 +51,8 @@ public class UserService {
     }
 
 
-        public void createAdmin(RegisterRequest req) {
-        if (userRepository.existsByEmail("admin@ou.edu.vn")) {
+    public void createAdmin(RegisterRequest req) {
+        if (userRepository.existsByEmail("admin@gmail.com")) {
             throw new IllegalArgumentException("Tài khoản admin đã tồn tại.");
         }
         User admin = new User();

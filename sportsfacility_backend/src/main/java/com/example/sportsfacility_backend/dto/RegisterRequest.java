@@ -7,6 +7,7 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String fullName;
+    private String phone;
     private Role role;
     private MultipartFile avatarUrl;
 
@@ -28,6 +29,12 @@ public class RegisterRequest {
     }
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
     public Role getRole() {
         return role;
