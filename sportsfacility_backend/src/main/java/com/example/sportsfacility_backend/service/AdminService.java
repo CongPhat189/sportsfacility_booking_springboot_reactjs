@@ -46,4 +46,16 @@ public class AdminService {
 
         return userRepository.save(user);
     }
+    // xóa user
+    public void deleteUser(Long id) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        if (user.getRole().name().equals("ADMIN")) {
+            throw new RuntimeException("Không thể xóa tài khoản ADMIN");
+        }
+
+        userRepository.delete(user);
+    }
 }

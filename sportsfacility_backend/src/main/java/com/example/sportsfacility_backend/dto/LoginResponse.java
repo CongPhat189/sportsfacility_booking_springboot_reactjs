@@ -7,13 +7,15 @@ public class LoginResponse {
     private String token;
     private String role;
     private String fullName;
+    private String phone;
     private String avatarUrl;
 
-    public LoginResponse(Long id, String token, String role, String fullName, String avatarUrl) {
+    public LoginResponse(Long id, String token, String role, String fullName, String phone, String avatarUrl) {
         this.id = id;
         this.token = token;
         this.role = role;
         this.fullName = fullName;
+        this.phone = phone;
         this.avatarUrl = avatarUrl;
     }
 
@@ -39,6 +41,13 @@ public class LoginResponse {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
     public String getAvatarUrl() {
         return avatarUrl;

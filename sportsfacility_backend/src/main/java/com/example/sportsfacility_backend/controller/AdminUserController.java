@@ -33,4 +33,11 @@ public class AdminUserController {
     public User unlockUser(@PathVariable Long id) {
         return adminService.unlockUser(id);
     }
+
+    // delete user
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return "Xóa user thành công";
+    }
 }
