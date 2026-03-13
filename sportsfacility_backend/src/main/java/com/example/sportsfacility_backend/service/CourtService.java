@@ -2,6 +2,7 @@ package com.example.sportsfacility_backend.service;
 
 import com.example.sportsfacility_backend.dto.CourtRequest;
 import com.example.sportsfacility_backend.dto.CourtResponse;
+import com.example.sportsfacility_backend.dto.CourtResponseDTO;
 import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.entity.CourtCategory;
 import com.example.sportsfacility_backend.entity.User;
@@ -9,6 +10,7 @@ import com.example.sportsfacility_backend.entity.enums.CourtStatus;
 import com.example.sportsfacility_backend.repository.CourtCategoryRepository;
 import com.example.sportsfacility_backend.repository.CourtRepository;
 import com.example.sportsfacility_backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +23,13 @@ public class CourtService {
     @Autowired
     private CourtRepository courtRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    @Transactional
+    public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId) {
+        return courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
 
-    @Autowired
-    private CourtCategoryRepository categoryRepository;
-
+                .map(CourtResponseDTO::new)
+                .toList();
+    }
     public CourtResponse createCourt(CourtRequest request) {
 
         User owner = userRepository.findById(request.getOwnerId())
@@ -56,6 +59,9 @@ public class CourtService {
         );
     }
 
+
+
+
     public List<CourtResponse> getAllCourts() {
         return courtRepository.findAll()
                 .stream()
@@ -69,6 +75,7 @@ public class CourtService {
                 ))
                 .collect(Collectors.toList());
     }
+
 
     public void deleteCourt(Long id) {
         courtRepository.deleteById(id);
