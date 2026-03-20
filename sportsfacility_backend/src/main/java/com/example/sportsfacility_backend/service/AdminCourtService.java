@@ -17,6 +17,9 @@ public class AdminCourtService {
     @Autowired
     private CourtRepository courtRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     // Lấy danh sách sân pending
     @Transactional(readOnly = true)
     public List<CourtResponseDTO> getPendingCourts() {
@@ -70,6 +73,11 @@ public class AdminCourtService {
         court.setStatus(CourtStatus.ACTIVE);
 
         Court savedCourt = courtRepository.save(court);
+        emailService.sendApproveCourtEmail(
+                savedCourt.getOwner().getEmail(),
+                savedCourt.getName(),
+                savedCourt.getOwner().getFullName()
+        );
 
         return new CourtResponseDTO(savedCourt);
     }
@@ -85,6 +93,12 @@ public class AdminCourtService {
         court.setRejectReason(reason);
 
         Court savedCourt = courtRepository.save(court);
+        emailService.sendRejectCourtEmail(
+                savedCourt.getOwner().getEmail(),
+                savedCourt.getName(),
+                reason,
+                savedCourt.getOwner().getFullName()
+        );
 
         return new CourtResponseDTO(savedCourt);
     }
