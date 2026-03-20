@@ -47,6 +47,15 @@ public class Booking {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "refund_bank_name", length = 100)
+    private String refundBankName;
+
+    @Column(name = "refund_account_number", length = 50)
+    private String refundAccountNumber;
+
+    @Column(name = "refund_account_holder", length = 100)
+    private String refundAccountHolder;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -103,6 +112,12 @@ public class Booking {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
+    public String getRefundBankName() { return refundBankName; }
+
+    public String getRefundAccountNumber() { return refundAccountNumber; }
+
+    public String getRefundAccountHolder() { return refundAccountHolder; }
+
     // ==================== Setters ====================
 
     public void setId(Long id) { this.id = id; }
@@ -128,4 +143,10 @@ public class Booking {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public void setRefundBankName(String refundBankName) { this.refundBankName = refundBankName; }
+
+    public void setRefundAccountNumber(String refundAccountNumber) { this.refundAccountNumber = refundAccountNumber; }
+
+    public void setRefundAccountHolder(String refundAccountHolder) { this.refundAccountHolder = refundAccountHolder; }
 }

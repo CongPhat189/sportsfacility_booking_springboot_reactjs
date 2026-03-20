@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { authAPIs, endpoints } from '../configs/APIs';
+import { authAPIs, endpoints } from '../config/APIs';
 import cookie from "react-cookies";
 
 const AuthContext = createContext();
