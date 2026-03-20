@@ -2,11 +2,14 @@ package com.example.sportsfacility_backend.service;
 
 import com.example.sportsfacility_backend.dto.BookingRequestDTO;
 import com.example.sportsfacility_backend.dto.BookingResponseDTO;
+import com.example.sportsfacility_backend.dto.CancelBookingRequest;
+import com.example.sportsfacility_backend.dto.CancelBookingResponse;
 import com.example.sportsfacility_backend.dto.ScheduleResponseDTO;
 import com.example.sportsfacility_backend.entity.Booking;
 import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.entity.CourtSchedule;
 import com.example.sportsfacility_backend.entity.User;
+import com.example.sportsfacility_backend.entity.enums.BookingStatus;
 import com.example.sportsfacility_backend.repository.BookingRepository;
 import com.example.sportsfacility_backend.repository.CourtRepository;
 import com.example.sportsfacility_backend.repository.CourtScheduleRepository;
@@ -72,5 +75,46 @@ public class BookingService {
 
         bookingRepository.save(booking);
         return new BookingResponseDTO(booking);
+    }
+
+    @Transactional
+    public CancelBookingResponse cancelBooking(Long bookingId, CancelBookingRequest req, String customerEmail) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (!booking.getCustomer().getEmail().equals(customerEmail)) {
+            throw new RuntimeException("Bạn không có quyền hủy booking này");
+        }
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new RuntimeException("Booking này đã bị hủy trước đó");
+        }
+
+        boolean refundEligible = LocalDateTime.now()
+                .isBefore(booking.getBookingDateTime().minusHours(24));
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking.setCancelReason(req.getCancelReason());
+
+        if (refundEligible) {
+            booking.setRefundBankName(req.getBankName());
+            booking.setRefundAccountNumber(req.getAccountNumber());
+            booking.setRefundAccountHolder(req.getAccountHolder());
+        }
+
+        bookingRepository.save(booking);
+
+        String message = refundEligible
+                ? "Hủy thành công. Tiền cọc sẽ được hoàn trả trong 3-5 ngày làm việc."
+                : "Hủy thành công. Tiền cọc không được hoàn do hủy trong vòng 24 giờ.";
+
+        return new CancelBookingResponse(bookingId, BookingStatus.CANCELLED, refundEligible, message);
+    }
+
+    @Transactional
+    public List<BookingResponseDTO> getBookingHistory(String customerEmail) {
+        return bookingRepository.findByCustomerEmailOrderByCreatedAtDesc(customerEmail)
+                .stream()
+                .map(BookingResponseDTO::new)
+                .toList();
     }
 }

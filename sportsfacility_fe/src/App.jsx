@@ -1,7 +1,13 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { AuthProvider, useAuth } from './context/AuthProvider'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import CourtSearchPage from './pages/CourtSearchPage'
+import PaymentSuccessPage from './pages/PaymentSuccessPage'
+import PaymentFailedPage from './pages/PaymentFailedPage'
+import BookingHistoryPage from './pages/BookingHistoryPage'
 
 function App() {
   function PrivateRoute({ children }) {
@@ -16,44 +22,33 @@ function App() {
 
     if (loading) return <div>Loading...</div>;
 
-    return user && user.role === 'admin' ? children : <Navigate to="/admin/login" replace />;
+    return user && user.role === 'ADMIN' ? children : <Navigate to="/admin/login" replace />;
   }
   function OwnerRoute({ children }) {
     const { user, loading } = useAuth();
 
     if (loading) return <div>Loading...</div>;
 
-    return user && user.role === 'owner' ? children : <Navigate to="/owner/login" replace />;
+    return user && user.role === 'OWNER' ? children : <Navigate to="/owner/login" replace />;
   }
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="App">
-          <Routes>
-
-
-
-
-
-
-          </Routes>
-
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
-        </div>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/courts" element={<CourtSearchPage />} />
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
+          <Route path="/payment/failed" element={<PaymentFailedPage />} />
+          <Route path="/my-bookings" element={
+            <PrivateRoute><BookingHistoryPage /></PrivateRoute>
+          } />
+          <Route path="/" element={<Navigate to="/courts" replace />} />
+        </Routes>
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       </BrowserRouter>
     </AuthProvider>
-  );
+  )
 }
 
 export default App

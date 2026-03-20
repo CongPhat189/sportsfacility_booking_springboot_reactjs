@@ -2,6 +2,8 @@ package com.example.sportsfacility_backend.controller;
 
 import com.example.sportsfacility_backend.dto.BookingRequestDTO;
 import com.example.sportsfacility_backend.dto.BookingResponseDTO;
+import com.example.sportsfacility_backend.dto.CancelBookingRequest;
+import com.example.sportsfacility_backend.dto.CancelBookingResponse;
 import com.example.sportsfacility_backend.dto.ScheduleResponseDTO;
 import com.example.sportsfacility_backend.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,5 +33,21 @@ public class BookingController {
             @RequestBody BookingRequestDTO req,
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(bookingService.createBooking(req, userDetails.getUsername()));
+    }
+
+    @PostMapping("/bookings/{id}/cancel")
+    public ResponseEntity<CancelBookingResponse> cancelBooking(
+            @PathVariable Long id,
+            @RequestBody CancelBookingRequest req,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+                bookingService.cancelBooking(id, req, userDetails.getUsername()));
+    }
+
+    @GetMapping("/bookings/history")
+    public ResponseEntity<List<BookingResponseDTO>> getHistory(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+                bookingService.getBookingHistory(userDetails.getUsername()));
     }
 }

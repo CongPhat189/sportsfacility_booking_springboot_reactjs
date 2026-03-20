@@ -40,7 +40,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/register/**", "/auth/login", "/auth/verify", "/ws/**"
+                        .requestMatchers(
+                                "/auth/register", "/auth/register/**", "/auth/login", "/auth/verify", "/ws/**",
+                                "/payments/vnpay/callback",
+                                "/courts/search",
+                                "/courts/categories",
+                                "/courts/*/available-slots"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/owner/**").hasRole("OWNER")
