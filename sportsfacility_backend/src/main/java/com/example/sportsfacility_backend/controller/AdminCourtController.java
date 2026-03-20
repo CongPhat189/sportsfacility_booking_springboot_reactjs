@@ -1,12 +1,12 @@
 package com.example.sportsfacility_backend.controller;
 
-import com.example.sportsfacility_backend.dto.CourtResponseDTO;
-import com.example.sportsfacility_backend.dto.RejectCourtRequest;
+import com.example.sportsfacility_backend.dto.*;
 import com.example.sportsfacility_backend.service.AdminCourtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -20,6 +20,18 @@ public class AdminCourtController {
     @GetMapping("/pending")
     public ResponseEntity<List<CourtResponseDTO>> getPendingCourts() {
         return ResponseEntity.ok(adminCourtService.getPendingCourts());
+    }
+
+        // Lấy danh sách sân đã duyệt
+    @GetMapping("/active")
+    public ResponseEntity<List<CourtResponseDTO>> getActiveCourts() {
+        return ResponseEntity.ok(adminCourtService.getActiveCourts());
+    }
+
+        // Lấy chi tiết sân
+    @GetMapping("/{id}")
+    public ResponseEntity<CourtResponseDTO> getCourtDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(adminCourtService.getCourtDetails(id));
     }
 
     // Duyệt sân
@@ -38,4 +50,16 @@ public class AdminCourtController {
                 adminCourtService.rejectCourt(id, request.getRejectReason())
         );
     }
+
+    // Cập nhật Commission
+    @PutMapping("/{id}/commission")
+    public ResponseEntity<CourtResponseDTO> updateCommission(
+            @PathVariable Long id,
+            @RequestBody CommissionRequest request) {
+
+        return ResponseEntity.ok(
+                adminCourtService.updateCommission(id, request.getCommissionRate())
+        );
+    }
+
 }
