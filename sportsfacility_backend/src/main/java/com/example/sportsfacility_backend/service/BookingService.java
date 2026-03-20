@@ -16,9 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class BookingService {
@@ -27,6 +30,7 @@ public class BookingService {
     @Autowired private BookingRepository bookingRepository;
     @Autowired private CourtRepository courtRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private EmailService emailService;
 
     @Transactional
     public List<ScheduleResponseDTO> getAvailableSlots(Long courtId, LocalDate date) {
@@ -39,6 +43,7 @@ public class BookingService {
 
     @Transactional
     public BookingResponseDTO createBooking(BookingRequestDTO req, String customerEmail) {
+
         User customer = userRepository.findByEmail(customerEmail)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
@@ -48,16 +53,21 @@ public class BookingService {
         CourtSchedule schedule = scheduleRepository.findById(req.getScheduleId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch"));
 
-        // Kiểm tra slot còn trống không
+        // check slot
         Byte dayOfWeek = (byte) (req.getDate().getDayOfWeek().getValue() % 7);
+
         boolean available = scheduleRepository
                 .findAvailableSlots(req.getCourtId(), dayOfWeek, req.getDate())
-                .stream().anyMatch(s -> s.getId().equals(req.getScheduleId()));
+                .stream()
+                .anyMatch(s -> s.getId().equals(req.getScheduleId()));
+
         if (!available) {
             throw new RuntimeException("Khung giờ này đã được đặt");
         }
 
+        // tạo booking
         LocalDateTime bookingDateTime = req.getDate().atTime(schedule.getStartTime());
+
         BigDecimal totalAmount = schedule.getPrice();
         BigDecimal depositAmount = totalAmount.multiply(new BigDecimal("0.5"));
 
@@ -70,7 +80,29 @@ public class BookingService {
         booking.setDepositAmount(depositAmount);
         booking.setNote(req.getNote());
 
-        bookingRepository.save(booking);
-        return new BookingResponseDTO(booking);
+
+        Booking savedBooking = bookingRepository.save(booking);
+
+        //FORMAT
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+        String formattedTime = savedBooking.getBookingDateTime().format(timeFormatter);
+
+        NumberFormat currency = NumberFormat.getInstance(new Locale("vi", "VN"));
+        String formattedMoney = currency.format(savedBooking.getTotalAmount());
+
+        // SEND MAIL SAFE
+        try {
+            emailService.sendBookingSuccessEmail(
+                    savedBooking.getCustomer().getEmail(),
+                    savedBooking.getCustomer().getFullName(),
+                    savedBooking.getCourt().getName(),
+                    formattedTime,
+                    formattedMoney
+            );
+        } catch (Exception e) {
+            System.out.println("Send mail failed: " + e.getMessage());
+        }
+
+        return new BookingResponseDTO(savedBooking);
     }
 }
