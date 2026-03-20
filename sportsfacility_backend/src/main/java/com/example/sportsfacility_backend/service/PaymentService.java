@@ -118,7 +118,7 @@ public class PaymentService {
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(LocalDateTime.now());
             Booking booking = payment.getBooking();
-            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setStatus(BookingStatus.PENDING);
             bookingRepository.save(booking);
         } else {
             payment.setStatus(PaymentStatus.FAILED);

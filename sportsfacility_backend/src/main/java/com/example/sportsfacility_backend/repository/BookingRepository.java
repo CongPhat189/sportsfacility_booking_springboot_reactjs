@@ -2,12 +2,14 @@ package com.example.sportsfacility_backend.repository;
 
 import com.example.sportsfacility_backend.dto.BookingPieDTO;
 import com.example.sportsfacility_backend.entity.Booking;
+import com.example.sportsfacility_backend.entity.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -46,4 +48,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             ORDER BY YEAR(b.bookingDateTime), MONTH(b.bookingDateTime)
             """)
     List<Object[]> getRevenueLast3Months(int month, int year);
+
+    @Query("""
+            SELECT COUNT(b.id), 
+                   COALESCE(SUM(b.totalAmount), 0), 
+                   COALESCE(SUM(b.totalAmount * (1 - c.commissionRate/100)), 0)
+            FROM Booking b
+            JOIN b.court c
+            WHERE c.owner.id = :ownerId
+              AND b.status = :status
+              AND b.bookingDateTime >= :startDate
+              AND b.bookingDateTime < :endDate
+            """)
+    List<Object[]> getOwnerRevenueByPeriod(@Param("ownerId") Long ownerId,
+                                           @Param("status") BookingStatus status,
+                                           @Param("startDate") LocalDateTime startDate,
+                                           @Param("endDate") LocalDateTime endDate);
 }
