@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sportsfacility_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
-    password: Admin@123
+    password: Admin123
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -43,9 +43,3 @@ cloudinary:
   cloud-name: dwd4b8lcx
   api-key: 271116451416351
   api-secret: fbyd8zzUl4OSzBFxkf4_cr4jNTk
-
-vnpay:
-  tmn-code: 63NUWGNE
-  hash-secret: C3NBM8MWADUJ1HDMU1KZ67YICMAD9BSJ
-  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  return-url: http://localhost:8080/payments/vnpay/callback
