@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -25,6 +26,38 @@ public class AdminCourtService {
                 .stream()
                 .map(CourtResponseDTO::new)
                 .toList();
+    }
+
+    // Lấy danh sách sân active
+    @Transactional(readOnly = true)
+    public List<CourtResponseDTO> getActiveCourts() {
+        return courtRepository
+                .findByStatus(CourtStatus.ACTIVE)
+                .stream()
+                .map(CourtResponseDTO::new)
+                .toList();
+    }
+
+    // Lấy chi tiết sân
+    @Transactional(readOnly = true)
+    public CourtResponseDTO getCourtDetails(Long id) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
+
+        return new CourtResponseDTO(court);
+    }
+
+    // Chỉnh sửa Commission
+    @Transactional
+    public CourtResponseDTO updateCommission(Long id, BigDecimal commission) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
+
+        court.setCommissionRate(commission);
+
+        Court savedCourt = courtRepository.save(court);
+
+        return new CourtResponseDTO(savedCourt);
     }
 
     // Duyệt sân
