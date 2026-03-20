@@ -8,6 +8,7 @@ import CourtSearchPage from './pages/CourtSearchPage'
 import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailedPage from './pages/PaymentFailedPage'
 import BookingHistoryPage from './pages/BookingHistoryPage'
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   function PrivateRoute({ children }) {
@@ -44,11 +45,12 @@ function App() {
             <PrivateRoute><BookingHistoryPage /></PrivateRoute>
           } />
           <Route path="/" element={<Navigate to="/courts" replace />} />
+          <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
         </Routes>
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }
 
 export default App

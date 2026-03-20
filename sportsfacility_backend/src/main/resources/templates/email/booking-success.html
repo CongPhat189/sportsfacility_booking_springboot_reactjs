@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background-color:#f0f4ff;font-family:'DM Sans',Arial,sans-serif;">
+
+<div style="padding:40px 16px;">
+  <div style="max-width:560px;margin:auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.10);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0056cc 0%,#007bff 60%,#4da6ff 100%);padding:44px 40px 36px;text-align:center;position:relative;">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);"></div>
+      <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.07);"></div>
+
+      <div style="display:inline-block;background:rgba(255,255,255,0.18);border-radius:50%;width:64px;height:64px;line-height:64px;font-size:30px;margin-bottom:14px;">✅</div>
+      <h1 style="margin:0;color:#ffffff;font-family:'Playfair Display',serif;font-size:28px;letter-spacing:0.5px;">Đặt sân thành công!</h1>
+      <p style="margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;letter-spacing:0.3px;">Lịch đặt sân của bạn đã được xác nhận</p>
+    </div>
+
+    <!-- Divider badge -->
+    <div style="text-align:center;margin-top:-18px;position:relative;z-index:2;">
+      <span style="display:inline-block;background:#fff;border:2px solid #007bff;color:#007bff;border-radius:20px;padding:5px 18px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,123,255,0.15);">Sport Arena</span>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:36px 40px 32px;">
+      <p style="margin:0 0 8px;color:#555;font-size:15px;">Xin chào,</p>
+      <p style="margin:0 0 28px;color:#1a1a1a;font-size:22px;font-family:'Playfair Display',serif;font-weight:700;" th:text="${fullName}"> </p>
+
+      <p style="margin:0 0 20px;color:#555;font-size:15px;line-height:1.7;">Bạn đã đặt sân thành công 🎉 Dưới đây là thông tin chi tiết lịch đặt của bạn:</p>
+
+      <!-- Info cards -->
+      <div style="background:#f4f8ff;border-radius:12px;overflow:hidden;margin-bottom:28px;">
+
+        <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #e0ecff;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:14px;flex-shrink:0;">🏟️</div>
+          <div>
+            <p style="margin:0 0 2px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;">Sân</p>
+            <p style="margin:0;font-size:15px;font-weight:600;color:#1a1a1a;" th:text="${courtName}"> </p>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid #e0ecff;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:14px;flex-shrink:0;">🕐</div>
+          <div>
+            <p style="margin:0 0 2px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;">Thời gian</p>
+            <p style="margin:0;font-size:15px;font-weight:600;color:#1a1a1a;" th:text="${time}"> </p>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;padding:16px 20px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:14px;flex-shrink:0;">💳</div>
+          <div>
+            <p style="margin:0 0 2px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;">Tổng tiền</p>
+            <p style="margin:0;font-size:15px;font-weight:700;color:#0056cc;" th:text="${totalAmount}"> </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Notice -->
+      <div style="background:#fffbea;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:28px;display:flex;align-items:flex-start;">
+        <span style="font-size:18px;margin-right:10px;flex-shrink:0;">⏰</span>
+        <p style="margin:0;color:#92400e;font-size:14px;line-height:1.6;">Vui lòng đến đúng giờ để tránh mất lịch. Nếu cần hỗ trợ, hãy liên hệ chúng tôi.</p>
+      </div>
+
+      <!-- Divider -->
+      <div style="border-top:1px solid #eef2ff;margin-bottom:24px;"></div>
+
+      <p style="margin:0;color:#888;font-size:14px;line-height:1.7;">
+        Trân trọng,<br/>
+        <span style="color:#0056cc;font-weight:600;">Đội ngũ Sport Arena</span>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#f4f8ff;padding:16px 40px;text-align:center;border-top:1px solid #e0ecff;">
+      <p style="margin:0;color:#aaa;font-size:12px;">© 2026 Sport Arena · Hệ thống quản lý sân thể thao</p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
