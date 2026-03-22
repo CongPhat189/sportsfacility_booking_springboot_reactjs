@@ -1,12 +1,10 @@
 package com.example.sportsfacility_backend.service;
 
+import com.example.sportsfacility_backend.dto.RevenueItemDTO;
 import com.example.sportsfacility_backend.dto.RevenueResponseDTO;
-import com.example.sportsfacility_backend.entity.enums.BookingStatus;
 import com.example.sportsfacility_backend.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -18,36 +16,41 @@ public class OwnerRevenueService {
         this.bookingRepository = bookingRepository;
     }
 
-    public RevenueResponseDTO getRevenue(Long ownerId, int year, Integer month) {
+    public RevenueResponseDTO getRevenue(Long ownerId, int year, Integer month){
 
-        LocalDateTime startDate;
-        LocalDateTime endDate;
+        List<Object[]> result = bookingRepository.getOwnerRevenueSeparate(ownerId, year, month);
 
-        if (month != null) {
-            startDate = LocalDateTime.of(year, month, 1, 0, 0, 0);
-            endDate = startDate.plusMonths(1);
-        } else {
-            startDate = LocalDateTime.of(year, 1, 1, 0, 0, 0);
-            endDate = startDate.plusYears(1);
+        // nếu không có dữ liệu
+        if(result.isEmpty()){
+            return new RevenueResponseDTO(
+                    new RevenueItemDTO(0L, 0.0, 0.0),
+                    new RevenueItemDTO(0L, 0.0, 0.0)
+            );
         }
 
-        // Lấy dữ liệu từ repository
-        List<Object[]> results = bookingRepository.getOwnerRevenueByPeriod(
-                ownerId, BookingStatus.COMPLETED, startDate, endDate
+        Object[] r = result.get(0);
+
+        RevenueItemDTO completed = new RevenueItemDTO(
+                toLong(r[0]),
+                toDouble(r[1]),
+                toDouble(r[2])
         );
 
-        // Lấy kết quả đầu tiên (aggregate luôn trả 1 row)
-        Object[] result = results.isEmpty() ? new Object[]{0L, 0.0, 0.0} : results.get(0);
+        RevenueItemDTO cancelled = new RevenueItemDTO(
+                toLong(r[3]),
+                toDouble(r[4]),
+                toDouble(r[5])
+        );
 
-        // ==== Thêm log debug ở đây ====
-        System.out.println("Owner revenue result: " + Arrays.toString(result));
-        // =================================
+        return new RevenueResponseDTO(completed, cancelled);
+    }
 
-        // Chuyển đổi kết quả
-        Long totalBookings = result[0] != null ? ((Number) result[0]).longValue() : 0L;
-        Double totalAmount = result[1] != null ? ((Number) result[1]).doubleValue() : 0.0;
-        Double revenueAfterCommission = result[2] != null ? ((Number) result[2]).doubleValue() : 0.0;
+    // 🔥 tránh null + lỗi cast
+    private Double toDouble(Object o){
+        return o == null ? 0.0 : ((Number) o).doubleValue();
+    }
 
-        return new RevenueResponseDTO(totalBookings, totalAmount, revenueAfterCommission);
+    private Long toLong(Object o){
+        return o == null ? 0L : ((Number) o).longValue();
     }
 }

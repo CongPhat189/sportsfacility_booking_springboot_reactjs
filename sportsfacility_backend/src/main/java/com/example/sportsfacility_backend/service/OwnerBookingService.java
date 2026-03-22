@@ -78,4 +78,39 @@ public class OwnerBookingService {
                 booking.getCancelReason()
         );
     }
+
+    // Confirm booking
+    public BookingResponse confirmBooking(Long id){
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+
+        // chỉ cho confirm khi đang PENDING
+        if(!booking.getStatus().name().equals("PENDING")){
+            throw new RuntimeException("Chỉ có thể xác nhận khi booking đang PENDING");
+        }
+
+        booking.setStatus(com.example.sportsfacility_backend.entity.enums.BookingStatus.CONFIRMED);
+
+        bookingRepository.save(booking);
+
+        return mapToResponse(booking);
+    }
+
+    //Cancel booking
+    public BookingResponse rejectBooking(Long id){
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking không tồn tại"));
+
+        if(!booking.getStatus().name().equals("PENDING")){
+            throw new RuntimeException("Chỉ có thể từ chối khi booking đang PENDING");
+        }
+
+        booking.setStatus(com.example.sportsfacility_backend.entity.enums.BookingStatus.CANCELLED);
+
+        bookingRepository.save(booking);
+
+        return mapToResponse(booking);
+    }
 }
