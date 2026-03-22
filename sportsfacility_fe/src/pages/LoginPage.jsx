@@ -16,7 +16,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const res = await axios.post(endpoints['login'], {
-        ...form, role: 'CUSTOMER'
+        ...form, role: 'OWNER',
       })
       login({
         id: res.data.id,

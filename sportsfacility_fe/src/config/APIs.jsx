@@ -22,6 +22,10 @@ export const endpoints = {
 
     // VNPay
     'vnpay-create':     '/payments/vnpay/create',
+
+    // OWNER - COURT CRUD APIs
+    'owner-courts': '/owner/courts',
+    'owner-court-detail': (id) => `/owner/courts/${id}`,
 }
 
 export const authAPIs = () => {
