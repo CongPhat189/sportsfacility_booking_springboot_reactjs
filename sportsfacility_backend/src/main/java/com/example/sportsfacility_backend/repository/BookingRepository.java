@@ -50,18 +50,22 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Object[]> getRevenueLast3Months(int month, int year);
 
     @Query("""
-            SELECT COUNT(b.id), 
-                   COALESCE(SUM(b.totalAmount), 0), 
-                   COALESCE(SUM(b.totalAmount * (1 - c.commissionRate/100)), 0)
-            FROM Booking b
-            JOIN b.court c
-            WHERE c.owner.id = :ownerId
-              AND b.status = :status
-              AND b.bookingDateTime >= :startDate
-              AND b.bookingDateTime < :endDate
+                SELECT 
+                    COUNT(CASE WHEN b.status = 'COMPLETED' THEN 1 END),
+                    SUM(CASE WHEN b.status = 'COMPLETED' THEN b.totalAmount ELSE 0 END),
+                    SUM(CASE WHEN b.status = 'COMPLETED' THEN b.totalAmount * (1 - c.commissionRate / 100) ELSE 0 END),
+            
+                    COUNT(CASE WHEN b.status = 'CANCELLED' THEN 1 END),
+                    SUM(CASE WHEN b.status = 'CANCELLED' THEN b.depositAmount ELSE 0 END),
+                    SUM(CASE WHEN b.status = 'CANCELLED' THEN b.depositAmount * (1 - c.commissionRate / 100) ELSE 0 END)
+            
+                FROM Booking b
+                JOIN b.court c
+                WHERE c.owner.id = :ownerId
+                  AND YEAR(b.bookingDateTime) = :year
+                  AND (:month IS NULL OR MONTH(b.bookingDateTime) = :month)
             """)
-    List<Object[]> getOwnerRevenueByPeriod(@Param("ownerId") Long ownerId,
-                                           @Param("status") BookingStatus status,
-                                           @Param("startDate") LocalDateTime startDate,
-                                           @Param("endDate") LocalDateTime endDate);
+    List<Object[]> getOwnerRevenueSeparate(@Param("ownerId") Long ownerId,
+                                           @Param("year") int year,
+                                           @Param("month") Integer month);
 }

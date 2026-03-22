@@ -46,4 +46,15 @@ public class OwnerBookingController {
 
         return "Booking deleted";
     }
+    // CONFIRM BOOKING
+    @PutMapping("/{id}/confirm")
+    public BookingResponse confirmBooking(@PathVariable Long id) {
+        return ownerBookingService.confirmBooking(id);
+    }
+
+    // REJECT BOOKING
+    @PutMapping("/{id}/reject")
+    public BookingResponse rejectBooking(@PathVariable Long id) {
+        return ownerBookingService.rejectBooking(id);
+    }
 }
