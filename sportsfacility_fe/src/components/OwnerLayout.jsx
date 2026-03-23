@@ -8,12 +8,12 @@ const OwnerLayout = () => {
   const location = useLocation();
 
   const pathParts = location.pathname.split("/");
-  const activeNav = pathParts[pathParts.length - 1] || "bookings"; // default active → bookings
+  const activeNav = pathParts[pathParts.length - 1] || "courts"; // default active → bookings
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: Users },
     { id: "finance", label: "Doanh thu", icon: CreditCard },
-    { id: "bookings", label: "Sân", icon: Calendar },
+    { id: "courts", label: "Sân", icon: Calendar },
     { id: "customers", label: "Khách hàng", icon: Users },
     { id: "settings", label: "Cài đặt", icon: BarChart2 },
   ];
@@ -44,16 +44,15 @@ const OwnerLayout = () => {
 
         <div className="flex-1">
           {navigationItems.map((item) => (
-      <Link
-        key={item.id}
-        to={`/owner/${item.id}`} // ✅ luôn absolute
-        className={`w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg mb-1 ${
-          activeNav === item.id ? "bg-emerald-500 text-white" : "hover:bg-slate-100"
-        }`}
-      >
-        <item.icon className="w-4 h-4" />
-        {item.label}
-      </Link>
+            <Link
+              key={item.id}
+              to={`/owner/${item.id}`} // ✅ luôn absolute
+              className={`w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg mb-1 ${activeNav === item.id ? "bg-emerald-500 text-white" : "hover:bg-slate-100"
+                }`}
+            >
+              <item.icon className="w-4 h-4" />
+              {item.label}
+            </Link>
           ))}
         </div>
 
