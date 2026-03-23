@@ -9,8 +9,8 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage'
 import PaymentFailedPage from './pages/PaymentFailedPage'
 import BookingHistoryPage from './pages/BookingHistoryPage'
 import AdminDashboard from './pages/AdminDashboard'
-import OwnerLayout from "./pages/OwnerLayout"
-import OwnerBookingPage from "./pages/OwnerBookingPage"
+import OwnerLayout from "./components/OwnerLayout"
+import OwnerCourtPage from "./pages/OwnerCourtPage"
 
 // Các route bảo vệ
 function PrivateRoute({ children }) {
@@ -21,12 +21,12 @@ function PrivateRoute({ children }) {
 function AdminRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div>Loading...</div>
-  return user && user.role === 'ADMIN' ? children : <Navigate to="/admin/login" replace />
+  return user && user.role === 'ADMIN' ? children : <Navigate to="/login" replace />
 }
 function OwnerRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div>Loading...</div>
-  return user && user.role === 'OWNER' ? children : <Navigate to="/owner/login" replace />
+  return user && user.role === 'OWNER' ? children : <Navigate to="/login" replace />
 }
 
 function App() {
@@ -58,9 +58,9 @@ function App() {
               <OwnerLayout />
             </OwnerRoute>
           }>
-            {/* Redirect /owner → /owner/bookings */}
-            <Route index element={<Navigate to="bookings" replace />} />
-            <Route path="bookings" element={<OwnerBookingPage />} />
+            {/* Redirect /owner → /owner/courts */}
+            <Route index element={<Navigate to="courts" replace />} />
+            <Route path="courts" element={<OwnerCourtPage />} />
             {/* Sau này thêm các route khác của Owner: finance, customers, settings */}
           </Route>
         </Routes>
