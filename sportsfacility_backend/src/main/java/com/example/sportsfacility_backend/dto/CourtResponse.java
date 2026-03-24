@@ -3,6 +3,7 @@ package com.example.sportsfacility_backend.dto;
 public class CourtResponse {
 
     private Long id;
+
     private String name;
     private String address;
     private String description;

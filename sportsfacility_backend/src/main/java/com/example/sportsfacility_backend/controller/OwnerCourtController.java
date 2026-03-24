@@ -2,6 +2,7 @@ package com.example.sportsfacility_backend.controller;
 
 import com.example.sportsfacility_backend.dto.CourtRequest;
 import com.example.sportsfacility_backend.dto.CourtResponse;
+import com.example.sportsfacility_backend.dto.CourtResponseDTO;
 import com.example.sportsfacility_backend.service.CourtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

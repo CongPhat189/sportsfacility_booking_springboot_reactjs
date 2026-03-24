@@ -68,6 +68,10 @@ public class CourtService {
 
 
 
+
+
+
+
     public List<CourtResponse> getAllCourts() {
         return courtRepository.findAll()
                 .stream()
