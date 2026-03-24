@@ -5,27 +5,64 @@ export const BASE_URL = 'http://localhost:8080/'
 
 export const endpoints = {
     // Auth
-    'register':         '/auth/register',
-    'login':            '/auth/login',
-    'current-user':     '/user/profile',
-    'current-user1': '/user/current-user',
+    'register': '/auth/register',
+    'login': '/auth/login',
+    'current-user': '/user/profile',
+
 
     // Courts
-    'courts-search':    '/courts/search',
-    'categories':       '/courts/categories',
-    'available-slots':  (courtId) => `/courts/${courtId}/available-slots`,
+    'courts-search': '/courts/search',
+    'categories': '/courts/categories',
+    'available-slots': (courtId) => `/courts/${courtId}/available-slots`,
 
     // Booking
-    'create-booking':   '/bookings',
-    'booking-history':  '/bookings/history',
-    'cancel-booking':   (id) => `/bookings/${id}/cancel`,
+    'create-booking': '/bookings',
+    'booking-history': '/bookings/history',
+    'cancel-booking': (id) => `/bookings/${id}/cancel`,
 
     // VNPay
-    'vnpay-create':     '/payments/vnpay/create',
+    'vnpay-create': '/payments/vnpay/create',
 
     // OWNER - COURT CRUD APIs
     'owner-courts': '/owner/courts',
     'owner-court-detail': (id) => `/owner/courts/${id}`,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // API for Admin
+    adminCategories: '/admin/categories',
+    createCategory: '/admin/categories',
+    updateCategory: (id) => `/admin/categories/${id}`,
+    deleteCategory: (id) => `/admin/categories/${id}`,
+    enableCategory: (id) => `/admin/categories/${id}/enable`,
+    disableCategory: (id) => `/admin/categories/${id}/disable`,
+
+    pendingCourts: '/admin/courts/pending',
+    activeCourts: '/admin/courts/active',
+    approveCourt: (id) => `/admin/courts/${id}/approve`,
+    rejectCourt: (id) => `/admin/courts/${id}/reject`,
+    detailsCourt: (id) => `/admin/courts/${id}`,
+    updateCommission: (id) => `/admin/courts/${id}/commission`,
+
+    getListUsers: '/admin/users',
+    lockUser: (id) => `/admin/users/${id}/lock`,
+    unlockUser: (id) => `/admin/users/${id}/unlock`,
+    deleteUser: (id) => `/admin/users/${id}`,
+
+    bookingReport: '/admin/reports/booking-pie',
+    revenueReport: '/admin/reports/revenue-3months',
 }
 
 export const authAPIs = () => {
