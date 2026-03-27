@@ -62,8 +62,10 @@ export const endpoints = {
     unlockUser: (id) => `/admin/users/${id}/unlock`,
     deleteUser: (id) => `/admin/users/${id}`,
 
-    bookingReport: '/admin/reports/booking-pie',
-    revenueReport: '/admin/reports/revenue-3months',
+    adminBookingReport: (month, year) => `/admin/reports/booking-pie?month=${month}&year=${year}`,
+    adminrevenueReport: (month, year) => `/admin/reports/revenue-3months?month=${month}&year=${year}`,
+
+
 }
 
 export const authAPIs = () => {
