@@ -10,7 +10,7 @@ export default function CourtSearchPage() {
   const [categories, setCategories] = useState([])
   const [courts, setCourts] = useState([])
   const [loading, setLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false) 
+  const [showModal, setShowModal] = useState(false)
   const [selectedCourt, setSelectedCourt] = useState(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [slots, setSlots] = useState([])
@@ -51,12 +51,12 @@ export default function CourtSearchPage() {
   }
 
   const fetchSlots = async (courtId, date) => {
-    if(!date) return
+    if (!date) return
     setSlotsLoading(true)
     try {
       const res = await authAPIs().get(endpoints['available-slots'](courtId), {
         params: { date }
-      
+
       })
       setSlots(res.data)
     } catch {
@@ -90,7 +90,7 @@ export default function CourtSearchPage() {
   useEffect(() => {
     axios.get(endpoints['categories'])
       .then(res => setCategories(res.data))
-      .catch(() => {})
+      .catch(() => { })
     handleSearch()
   }, [])
 
@@ -105,7 +105,7 @@ export default function CourtSearchPage() {
     if (showModal && selectedCourt && selectedDate) {
       fetchSlots(selectedCourt.id, selectedDate)
     }
-  }, [selectedDate, showModal])
+  }, [selectedDate, showModal, selectedCourt])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -195,7 +195,7 @@ export default function CourtSearchPage() {
           </div>
         )}
       </div>
-            {/* Booking Modal */}
+      {/* Booking Modal */}
       {showModal && selectedCourt && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -226,11 +226,10 @@ export default function CourtSearchPage() {
                   <div className="grid grid-cols-2 gap-2">
                     {slots.map(slot => (
                       <button key={slot.id} onClick={() => setSelectedSlot(slot)}
-                        className={`border rounded-lg p-3 text-sm text-left transition-colors ${
-                          selectedSlot?.id === slot.id
+                        className={`border rounded-lg p-3 text-sm text-left transition-colors ${selectedSlot?.id === slot.id
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'hover:border-blue-300 hover:bg-gray-50'
-                        }`}>
+                          }`}>
                         <div className="font-medium">{slot.startTime} - {slot.endTime}</div>
                         <div className="text-blue-600 mt-0.5">{slot.price?.toLocaleString('vi-VN')}đ</div>
                       </button>
@@ -268,6 +267,6 @@ export default function CourtSearchPage() {
       )}
 
     </div>
-    
+
   )
 }
