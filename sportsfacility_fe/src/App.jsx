@@ -11,6 +11,8 @@ import BookingHistoryPage from './pages/BookingHistoryPage'
 import AdminDashboard from './pages/AdminDashboard'
 import OwnerLayout from "./components/OwnerLayout"
 import OwnerCourtPage from "./pages/OwnerCourtPage"
+import OwnerSchedulePage from "./pages/OwnerSchedulePage"
+import OwnerBookingPage from "./pages/OwnerBookingPage"
 
 // Các route bảo vệ
 function PrivateRoute({ children }) {
@@ -61,6 +63,9 @@ function App() {
             {/* Redirect /owner → /owner/courts */}
             <Route index element={<Navigate to="courts" replace />} />
             <Route path="courts" element={<OwnerCourtPage />} />
+            <Route path="schedule" element={<OwnerSchedulePage />} />
+            <Route path="booking" element={<OwnerBookingPage />} />
+
             {/* Sau này thêm các route khác của Owner: finance, customers, settings */}
           </Route>
         </Routes>

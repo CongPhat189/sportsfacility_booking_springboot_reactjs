@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Calendar, Users, CreditCard, BarChart2 } from "lucide-react";
+import { Calendar, Users, CreditCard, BarChart2, LogOut, Layers, ShoppingCart } from "lucide-react";
 import { useAuth } from "../context/AuthProvider";
 
 const OwnerLayout = () => {
@@ -8,13 +8,14 @@ const OwnerLayout = () => {
   const location = useLocation();
 
   const pathParts = location.pathname.split("/");
-  const activeNav = pathParts[pathParts.length - 1] || "courts"; // default active → bookings
+  const activeNav = pathParts[pathParts.length - 1] || "courts";
 
   const navigationItems = [
-    { id: "dashboard", label: "Dashboard", icon: Users },
-    { id: "finance", label: "Doanh thu", icon: CreditCard },
-    { id: "courts", label: "Sân", icon: Calendar },
-    { id: "customers", label: "Khách hàng", icon: Users },
+    { id: "dashboard", label: "Dashboard", icon: Layers },
+    { id: "schedule", label: "Lịch sân", icon: CreditCard },
+    { id: "courts", label: "Quản lý sân", icon: Calendar },
+    { id: "booking", label: "Đơn hàng", icon: ShoppingCart },
+    { id: "customers", label: "Doanh thu", icon: Users },
     { id: "settings", label: "Cài đặt", icon: BarChart2 },
   ];
 
@@ -27,63 +28,92 @@ const OwnerLayout = () => {
     }).format(new Date());
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-slate-200 p-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-6">
-          <img
-            src={user?.avatar || "https://ui-avatars.com/api/?name=Owner&background=10b981&color=fff"}
-            alt="avatar"
-            className="w-10 h-10 rounded-full ring-2 ring-emerald-200"
-          />
+    <div className="flex min-h-screen bg-slate-100">
+      {/* ── SIDEBAR ── */}
+      <aside className="w-60 min-h-screen bg-slate-900 flex flex-col px-4 py-7 sticky top-0 shrink-0">
+        {/* Brand */}
+        <div className="flex items-center gap-3 px-2 pb-6 mb-6 border-b border-slate-700">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-lg shrink-0">
+            🏟️
+          </div>
           <div>
-            <p className="font-bold text-sm">{user?.name || "Owner"}</p>
-            <p className="text-xs text-slate-400">{user?.email || "owner@gmail.com"}</p>
+            <p className="text-white font-bold text-sm leading-tight">Xin chào</p>
+            <p className="text-slate-500 text-xs">Quản lý sân</p>
           </div>
         </div>
 
-        <div className="flex-1">
+        {/* Profile */}
+        <div className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 mb-6">
+          <img
+            src={
+              user?.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "Owner")}&background=10b981&color=fff`
+            }
+            alt="avatar"
+            className="w-9 h-9 rounded-full border-2 border-emerald-500 object-cover shrink-0"
+          />
+          <div className="min-w-0">
+            <p className="text-slate-100 font-semibold text-sm truncate">{user?.name || "Owner"}</p>
+            <p className="text-slate-500 text-xs truncate">{user?.email || "owner@gmail.com"}</p>
+          </div>
+        </div>
+
+        {/* Nav label */}
+        <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest px-2 mb-2">Menu</p>
+
+        {/* Nav items */}
+        <nav className="flex-1 flex flex-col gap-0.5">
           {navigationItems.map((item) => (
             <Link
               key={item.id}
-              to={`/owner/${item.id}`} // ✅ luôn absolute
-              className={`w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg mb-1 ${activeNav === item.id ? "bg-emerald-500 text-white" : "hover:bg-slate-100"
-                }`}
+              to={`/owner/${item.id}`}
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                activeNav === item.id
+                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+              }`}
             >
-              <item.icon className="w-4 h-4" />
+              <item.icon
+                className={`w-4 h-4 shrink-0 ${activeNav === item.id ? "opacity-100" : "opacity-50"}`}
+              />
               {item.label}
             </Link>
           ))}
-        </div>
+        </nav>
 
+        {/* Logout */}
         <button
           onClick={logout}
-          className="mt-4 w-full px-4 py-2 rounded-lg bg-red-50 text-red-600 font-medium hover:bg-red-100 flex items-center justify-center gap-2"
+          className="mt-5 flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-all w-full"
         >
+          <LogOut className="w-4 h-4 opacity-80" />
           Đăng xuất
         </button>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
+      {/* ── MAIN ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Topbar */}
+        <header className="sticky top-0 z-10 bg-white border-b border-slate-200 px-8 h-16 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">
               {navigationItems.find((n) => n.id === activeNav)?.label || "Owner Dashboard"}
             </h1>
-            <p className="text-sm text-slate-500">Chào mừng, {user?.name || "Owner"} 👋</p>
+            <p className="text-xs text-slate-400">Chào mừng, {user?.name || "Owner"} 👋</p>
           </div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <Calendar className="w-4 h-4" />
-            <span className="text-sm">{getTodayVN()}</span>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-500 text-sm font-medium">
+            <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+            {getTodayVN()}
           </div>
-        </div>
+        </header>
 
-        {/* Nội dung route con */}
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <Outlet />
+        {/* Page body */}
+        <div className="flex-1 p-8">
+          <div className="bg-white rounded-2xl border border-slate-200 min-h-96 overflow-hidden">
+            <Outlet />
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
