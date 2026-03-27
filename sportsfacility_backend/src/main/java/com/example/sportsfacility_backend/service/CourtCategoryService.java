@@ -72,4 +72,9 @@ public class CourtCategoryService {
 
         return courtCategoryRepository.save(category);
     }
+
+    //Delete
+    public void deleteCategory( Integer id ){
+        courtCategoryRepository.deleteById(id);
+    }
 }

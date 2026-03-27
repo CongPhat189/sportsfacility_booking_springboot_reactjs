@@ -46,7 +46,7 @@ public class AdminCourtCategoryController {
     }
 
     // DISABLE CATEGORY
-    @PatchMapping("/{id}/disable")
+    @PutMapping("/{id}/disable")
     public ResponseEntity<CourtCategory> disableCategory(@PathVariable Integer id) {
 
         CourtCategory category = courtCategoryService.disableCategory(id);
@@ -54,10 +54,18 @@ public class AdminCourtCategoryController {
     }
 
     // ENABLE CATEGORY
-    @PatchMapping("/{id}/enable")
+    @PutMapping("/{id}/enable")
     public ResponseEntity<CourtCategory> enableCategory(@PathVariable Integer id) {
 
         CourtCategory category = courtCategoryService.enableCategory(id);
         return ResponseEntity.ok(category);
     }
+
+    // Delete
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCourt(@PathVariable Integer id){
+        courtCategoryService.deleteCategory(id);
+        return ResponseEntity.ok("Category deleted successfully");
+    }
+
 }
