@@ -9,37 +9,29 @@ public class CourtResponse {
     private String imageUrl;
     private String status;
 
+    private Integer  categoryId;
+    private String categoryName;
+
     public CourtResponse(Long id, String name, String address,
-                         String description, String imageUrl, String status) {
+                         String description, String imageUrl, String status,
+                         Integer  categoryId, String categoryName) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.description = description;
         this.imageUrl = imageUrl;
         this.status = status;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getAddress() { return address; }
+    public String getDescription() { return description; }
+    public String getImageUrl() { return imageUrl; }
+    public String getStatus() { return status; }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public String getStatus() {
-        return status;
-    }
+    public Integer  getCategoryId() { return categoryId; }
+    public String getCategoryName() { return categoryName; }
 }

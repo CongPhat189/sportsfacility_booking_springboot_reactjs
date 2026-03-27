@@ -26,7 +26,8 @@ public class CourtService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired CourtCategoryRepository categoryRepository;
+    @Autowired
+    private CourtCategoryRepository categoryRepository;
 
 
     @Transactional
@@ -36,9 +37,11 @@ public class CourtService {
                 .map(CourtResponseDTO::new)
                 .toList();
     }
-    public CourtResponse createCourt(CourtRequest request) {
 
-        User owner = userRepository.findById(request.getOwnerId())
+    // ================= CREATE =================
+    public CourtResponse createCourt(CourtRequest request, String email) {
+
+        User owner = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
 
         CourtCategory category = categoryRepository.findById(request.getCategoryId())
@@ -61,13 +64,13 @@ public class CourtService {
                 court.getAddress(),
                 court.getDescription(),
                 court.getImageUrl(),
-                court.getStatus().name()
+                court.getStatus().name(),
+                court.getCategory().getId(),
+                court.getCategory().getName()
         );
     }
 
-
-
-
+    // ================= GET ALL =================
     public List<CourtResponse> getAllCourts() {
         return courtRepository.findAll()
                 .stream()
@@ -77,15 +80,19 @@ public class CourtService {
                         c.getAddress(),
                         c.getDescription(),
                         c.getImageUrl(),
-                        c.getStatus().name()
+                        c.getStatus().name(),
+                        c.getCategory().getId(),
+                        c.getCategory().getName()
                 ))
                 .collect(Collectors.toList());
     }
 
-
+    // ================= DELETE =================
     public void deleteCourt(Long id) {
         courtRepository.deleteById(id);
     }
+
+    // ================= GET BY ID =================
     public CourtResponse getCourtById(Long id){
 
         Court court = courtRepository.findById(id)
@@ -97,9 +104,13 @@ public class CourtService {
                 court.getAddress(),
                 court.getDescription(),
                 court.getImageUrl(),
-                court.getStatus().name()
+                court.getStatus().name(),
+                court.getCategory().getId(),
+                court.getCategory().getName()
         );
     }
+
+    // ================= UPDATE =================
     public CourtResponse updateCourt(Long id, CourtRequest request) {
 
         Court court = courtRepository.findById(id)
@@ -114,6 +125,8 @@ public class CourtService {
         court.setDescription(request.getDescription());
         court.setImageUrl(request.getImageUrl());
 
+        court.setStatus(CourtStatus.PENDING);
+
         courtRepository.save(court);
 
         return new CourtResponse(
@@ -122,7 +135,30 @@ public class CourtService {
                 court.getAddress(),
                 court.getDescription(),
                 court.getImageUrl(),
-                court.getStatus().name()
+                court.getStatus().name(),
+                court.getCategory().getId(),
+                court.getCategory().getName()
         );
+    }
+
+    // ================= GET BY OWNER =================
+    public List<CourtResponse> getCourtsByOwner(String email){
+
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
+
+        return courtRepository.findByOwnerId(owner.getId())
+                .stream()
+                .map(c -> new CourtResponse(
+                        c.getId(),
+                        c.getName(),
+                        c.getAddress(),
+                        c.getDescription(),
+                        c.getImageUrl(),
+                        c.getStatus().name(),
+                        c.getCategory().getId(),
+                        c.getCategory().getName()
+                ))
+                .collect(Collectors.toList());
     }
 }

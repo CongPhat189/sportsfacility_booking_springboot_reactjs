@@ -7,17 +7,19 @@ public class CourtScheduleResponse {
 
     private Long id;
     private Long courtId;
+    private String courtName;
     private Byte dayOfWeek;
     private LocalTime startTime;
     private LocalTime endTime;
     private BigDecimal price;
     private Boolean isActive;
 
-    public CourtScheduleResponse(Long id, Long courtId, Byte dayOfWeek,
+    public CourtScheduleResponse(Long id, Long courtId,String courtName, Byte dayOfWeek,
                                  LocalTime startTime, LocalTime endTime,
                                  BigDecimal price, Boolean isActive) {
         this.id = id;
         this.courtId = courtId;
+        this.courtName = courtName;
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -27,6 +29,7 @@ public class CourtScheduleResponse {
 
     public Long getId() { return id; }
     public Long getCourtId() { return courtId; }
+    public String getCourtName() { return courtName; }
     public Byte getDayOfWeek() { return dayOfWeek; }
     public LocalTime getStartTime() { return startTime; }
     public LocalTime getEndTime() { return endTime; }
