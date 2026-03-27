@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public class CourtResponseDTO {
 
-    private Long id;
+
     private Long ownerId;
     private String ownerName;
     private Integer categoryId;
@@ -23,7 +23,7 @@ public class CourtResponseDTO {
     private LocalDateTime createdAt;
 
     public CourtResponseDTO(Court court) {
-        this.id = court.getId();
+
         this.ownerId = court.getOwner().getId();
         this.ownerName = court.getOwner().getFullName();
         this.categoryId = court.getCategory().getId();
@@ -38,7 +38,7 @@ public class CourtResponseDTO {
         this.createdAt = court.getCreatedAt();
     }
 
-    public Long getId() { return id; }
+
     public Long getOwnerId() { return ownerId; }
     public String getOwnerName() { return ownerName; }
     public Integer getCategoryId() { return categoryId; }
