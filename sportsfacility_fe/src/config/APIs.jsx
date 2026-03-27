@@ -42,12 +42,13 @@ export const endpoints = {
 
 
     // API for Admin
-    adminCategories: '/admin/categories',
+    getCategories: '/admin/categories',
     createCategory: '/admin/categories',
     updateCategory: (id) => `/admin/categories/${id}`,
     deleteCategory: (id) => `/admin/categories/${id}`,
     enableCategory: (id) => `/admin/categories/${id}/enable`,
     disableCategory: (id) => `/admin/categories/${id}/disable`,
+
 
     pendingCourts: '/admin/courts/pending',
     activeCourts: '/admin/courts/active',

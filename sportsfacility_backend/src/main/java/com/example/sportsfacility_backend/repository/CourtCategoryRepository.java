@@ -9,4 +9,5 @@ public interface CourtCategoryRepository extends JpaRepository<CourtCategory, In
 
     Optional<CourtCategory> findByName(String name);
 
+
 }
