@@ -32,6 +32,13 @@ export const endpoints = {
     'owner-courts': '/owner/courts',
     'owner-court-detail': (id) => `/owner/courts/${id}`,
 
+    // OWNER - SCHEDULE
+    'owner-schedules': '/owner/schedules',
+    // 'owner-schedules': (courtId = "") => `/owner/schedules${courtId ? `/${courtId}` : ""}`,
+
+    // OWNER - BOOKINGS
+    'owner-bookings': '/owner/bookings',
+
 
 
 

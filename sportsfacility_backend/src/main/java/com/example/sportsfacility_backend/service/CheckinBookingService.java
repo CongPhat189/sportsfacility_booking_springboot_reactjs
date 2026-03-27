@@ -32,13 +32,6 @@
 
             long minutes = Duration.between(bookingTime, now).toMinutes();
 
-
-            // 🔥 DEBUG
-            System.out.println("NOW = " + now);
-            System.out.println("BOOKING TIME = " + bookingTime);
-            System.out.println("MINUTES = " + minutes);
-
-
             // chưa tới giờ
             if(minutes < 0){
                 System.out.println(">>> CHUA TOI GIO <<<");
@@ -53,7 +46,6 @@
             }
             else {
                 booking.setStatus(BookingStatus.CHECKED_IN);
-    //            booking.setCheckinTime(LocalDateTime.now());
             }
 
             bookingRepository.save(booking);

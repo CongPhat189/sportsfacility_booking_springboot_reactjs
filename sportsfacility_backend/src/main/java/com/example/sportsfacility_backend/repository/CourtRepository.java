@@ -7,10 +7,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CourtRepository extends JpaRepository<Court, Long> {
 
-    List<Court> findByOwnerId(Long ownerId);
+    Optional<Court> findByIdAndStatus(Long id, CourtStatus status);
+
+    @Query("""
+       SELECT c FROM Court c
+       JOIN FETCH c.category
+       WHERE c.owner.id = :ownerId
+       """)
+    List<Court> findByOwnerId(@Param("ownerId") Long ownerId);
+
 
 
     @Query("""
@@ -28,4 +37,5 @@ public interface CourtRepository extends JpaRepository<Court, Long> {
     List<Court> search(@Param("keyword") String keyword,
                        @Param("categoryId") Integer categoryId,
                        @Param("status") CourtStatus status);
+
 }
