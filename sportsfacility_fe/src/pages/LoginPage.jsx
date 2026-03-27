@@ -5,7 +5,7 @@ import axios, { endpoints } from '../config/APIs'
 import { useAuth } from '../context/AuthProvider'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '' , role: 'CUSTOMER'})
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -15,9 +15,7 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await axios.post(endpoints['login'], {
-        ...form, role: 'OWNER',
-      })
+      const res = await axios.post(endpoints['login'], form)
       login({
         id: res.data.id,
         fullName: res.data.fullName,
@@ -25,7 +23,16 @@ export default function LoginPage() {
         phone: res.data.phone,
         avatarUrl: res.data.avatarUrl
       }, res.data.token)
-      navigate('/courts')
+      if (res.data.role === 'ADMIN') {
+        navigate('/admin/dashboard')
+      }
+      else if (res.data.role === 'OWNER') {
+        navigate('/owner/courts')
+      }
+      else {
+        navigate('/courts')
+      }
+      
     } catch (err) {
       toast.error(err.response?.data || 'Đăng nhập thất bại')
     } finally {
@@ -58,6 +65,15 @@ export default function LoginPage() {
               {showPassword ? '🙈' : '👁️'}
             </button>
           </div>
+          <select
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={form.role}
+            onChange={e => setForm({ ...form, role: e.target.value })}
+          >
+            <option value="CUSTOMER">Khách hàng</option>
+            <option value="OWNER">Chủ sân</option>
+            <option value="ADMIN">Quản trị viên</option>
+          </select>
           <button
             type="submit" disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"

@@ -23,6 +23,11 @@ export const endpoints = {
     // VNPay
     'vnpay-create':     '/payments/vnpay/create',
 
+    // Reviews
+    'create-review':  '/reviews',
+    'booking-review': (id) => `/bookings/${id}/review`,
+
+
     // OWNER - COURT CRUD APIs
     'owner-courts': '/owner/courts',
     'owner-court-detail': (id) => `/owner/courts/${id}`,

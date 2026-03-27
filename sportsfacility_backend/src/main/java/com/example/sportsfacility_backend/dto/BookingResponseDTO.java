@@ -5,6 +5,7 @@ import com.example.sportsfacility_backend.entity.enums.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class BookingResponseDTO {
 
@@ -18,6 +19,8 @@ public class BookingResponseDTO {
     private BookingStatus status;
     private String note;
     private LocalDateTime createdAt;
+    private LocalTime scheduleStartTime;
+    private LocalTime scheduleEndTime;
 
     public BookingResponseDTO(Booking b) {
         this.id = b.getId();
@@ -29,6 +32,9 @@ public class BookingResponseDTO {
         this.depositAmount = b.getDepositAmount();
         this.status = b.getStatus();
         this.note = b.getNote();
+        this.scheduleStartTime = b.getSchedule().getStartTime();
+        this.scheduleEndTime = b.getSchedule().getEndTime();
+
         this.createdAt = b.getCreatedAt();
     }
 
@@ -41,5 +47,7 @@ public class BookingResponseDTO {
     public BigDecimal getDepositAmount() { return depositAmount; }
     public BookingStatus getStatus() { return status; }
     public String getNote() { return note; }
+    public LocalTime getScheduleStartTime() { return scheduleStartTime; }
+    public LocalTime getScheduleEndTime() { return scheduleEndTime; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
