@@ -34,7 +34,6 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/courts" element={<CourtSearchPage />} />
@@ -68,7 +67,7 @@ function App() {
         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       </BrowserRouter>
     </AuthProvider>
-  )
+  );
 }
 
 export default App

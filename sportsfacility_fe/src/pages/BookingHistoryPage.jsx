@@ -9,6 +9,7 @@ const STATUS_LABELS = {
   CANCELLED:  { label: 'Đã hủy',        color: 'bg-red-100 text-red-700' },
   CHECKED_IN: { label: 'Đã check-in',   color: 'bg-blue-100 text-blue-700' },
   EXPIRED:    { label: 'Hết hạn',       color: 'bg-gray-100 text-gray-500' },
+  COMPLETED:  { label: 'Hoàn thành', color: 'bg-purple-100 text-purple-700' },
 }
 
 export default function BookingHistoryPage() {
@@ -17,21 +18,34 @@ export default function BookingHistoryPage() {
   const [cancelForm, setCancelForm] = useState({
     cancelReason: '', bankName: '', accountNumber: '', accountHolder: ''
   })
+  const [reviewModal, setReviewModal] = useState(null)
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' })  
+  const [reviews, setReviews] = useState({})
+
   const navigate = useNavigate()
 
   const loadHistory = async () => {
-    try {
-      const res = await authAPIs().get(endpoints['booking-history'])
-      setBookings(res.data)
-    } catch {
-      toast.error('Không thể tải lịch sử đặt sân')
-    }
+  try {
+    const res = await authAPIs().get(endpoints['booking-history'])
+    setBookings(res.data)
+    const completed = res.data.filter(b => b.status === 'COMPLETED')
+    const reviewMap = {}
+    await Promise.all(completed.map(async b => {
+      try {
+        const r = await authAPIs().get(endpoints['booking-review'](b.id))
+        if (r.status === 200) reviewMap[b.id] = r.data
+      } catch { /* ignore */ }
+    }))
+    setReviews(reviewMap)
+  } catch {
+    toast.error('Không thể tải lịch sử đặt sân')
   }
+}
+
 
   useEffect(() => {
-    authAPIs().get(endpoints['booking-history'])
-      .then(res => setBookings(res.data))
-      .catch(() => toast.error('Không thể tải lịch sử đặt sân'))
+    const init = async () => { await loadHistory() }
+  init()
   }, [])
 
   const canCancel = (b) => b.status === 'PENDING' || b.status === 'CONFIRMED'
@@ -50,6 +64,21 @@ export default function BookingHistoryPage() {
       loadHistory()
     } catch (err) {
       toast.error(err.response?.data || 'Hủy thất bại')
+    }
+  }
+
+  const handleSubmitReview = async () => {
+    try {
+      const res = await authAPIs().post(endpoints['create-review'], {
+        bookingId: reviewModal,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment
+      })
+      setReviews(prev => ({ ...prev, [reviewModal]: res.data }))
+      toast.success('Đánh giá thành công!')
+      setReviewModal(null)
+      } catch (err) {
+      toast.error(err.response?.data || 'Gửi đánh giá thất bại')
     }
   }
 
@@ -82,7 +111,12 @@ export default function BookingHistoryPage() {
                     <div>
                       <h3 className="font-semibold text-lg">{b.courtName}</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        {new Date(b.bookingDateTime).toLocaleString('vi-VN')}
+                        {new Date(b.bookingDateTime).toLocaleDateString('vi-VN')}
+                        {b.scheduleStartTime && b.scheduleEndTime && (
+                          <span className="ml-2 font-medium text-gray-700">
+                            {b.scheduleStartTime} - {b.scheduleEndTime}
+                          </span>
+                        )}
                       </p>
                       <p className="text-sm mt-1">
                         Tiền cọc: <span className="font-medium text-blue-600">
@@ -101,6 +135,21 @@ export default function BookingHistoryPage() {
                     >
                       Hủy đặt sân
                     </button>
+                  )}
+                  {b.status === 'COMPLETED' && (
+                    reviews[b.id] ? (
+                      <div className="mt-3 flex items-center gap-1 text-sm text-yellow-500">
+                        {'★'.repeat(reviews[b.id].rating)}{'☆'.repeat(5 - reviews[b.id].rating)}
+                        <span className="text-gray-500 ml-2">{reviews[b.id].comment}</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setReviewModal(b.id); setReviewForm({ rating: 5, comment: '' }) }}
+                        className="mt-3 text-sm text-purple-600 hover:underline"
+                      >
+                        ★ Đánh giá
+                      </button>
+                    )
                   )}
                 </div>
               )
@@ -168,6 +217,44 @@ export default function BookingHistoryPage() {
                 className="flex-1 bg-red-500 text-white rounded-lg py-2 text-sm hover:bg-red-600"
               >
                 Xác nhận hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {reviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-bold mb-4">Đánh giá sân</h2>
+
+            <div className="flex gap-2 mb-4 justify-center">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button key={star}
+                  onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                  className={`text-3xl transition-transform hover:scale-110 ${
+                    star <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'
+                  }`}>
+                  ★
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              placeholder="Nhận xét của bạn về sân..."
+              className="w-full border rounded-lg p-3 text-sm mb-4"
+              rows={4}
+              value={reviewForm.comment}
+              onChange={e => setReviewForm({ ...reviewForm, comment: e.target.value })}
+            />
+
+            <div className="flex gap-3">
+              <button onClick={() => setReviewModal(null)}
+                className="flex-1 border rounded-lg py-2 text-sm hover:bg-gray-50">
+                Đóng
+              </button>
+              <button onClick={handleSubmitReview}
+                className="flex-1 bg-purple-600 text-white rounded-lg py-2 text-sm hover:bg-purple-700">
+                Gửi đánh giá
               </button>
             </div>
           </div>

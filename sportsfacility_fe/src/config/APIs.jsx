@@ -21,11 +21,18 @@ export const endpoints = {
     'cancel-booking': (id) => `/bookings/${id}/cancel`,
 
     // VNPay
-    'vnpay-create': '/payments/vnpay/create',
+    'vnpay-create':     '/payments/vnpay/create',
+
+    // Reviews
+    'create-review':  '/reviews',
+    'booking-review': (id) => `/bookings/${id}/review`,
+
 
     // OWNER - COURT CRUD APIs
     'owner-courts': '/owner/courts',
     'owner-court-detail': (id) => `/owner/courts/${id}`,
+
+
 
 
 
