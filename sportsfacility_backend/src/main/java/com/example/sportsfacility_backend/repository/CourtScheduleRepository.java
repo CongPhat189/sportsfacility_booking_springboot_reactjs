@@ -13,6 +13,7 @@ public interface CourtScheduleRepository extends JpaRepository<CourtSchedule, Lo
     // Lấy tất cả schedule của owner, fetch court luôn
     @Query("SELECT cs FROM CourtSchedule cs JOIN FETCH cs.court c WHERE c.owner.id = :ownerId")
     List<CourtSchedule> findByOwnerIdWithCourt(@Param("ownerId") Long ownerId);
+    List<CourtSchedule> findByCourtIdAndDayOfWeek(Long courtId, Byte dayOfWeek);
 
     // Lấy schedule theo id, fetch court và owner luôn
     @Query("SELECT cs FROM CourtSchedule cs " +

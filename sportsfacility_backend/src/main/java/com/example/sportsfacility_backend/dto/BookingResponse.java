@@ -13,12 +13,16 @@ public class BookingResponse {
     private BigDecimal depositAmount;
     private LocalDateTime bookingDateTime;
     private String cancelReason;
+    private String customerName;
+    private String courtName;
 
     public BookingResponse(Long id, Long courtId, Long scheduleId,
                            String status, BigDecimal totalAmount,
                            BigDecimal depositAmount,
                            LocalDateTime bookingDateTime,
-                           String cancelReason) {
+                           String cancelReason,
+                           String customerName,
+                           String courtName) {
 
         this.id = id;
         this.courtId = courtId;
@@ -28,6 +32,8 @@ public class BookingResponse {
         this.depositAmount = depositAmount;
         this.bookingDateTime = bookingDateTime;
         this.cancelReason = cancelReason;
+        this.customerName = customerName;
+        this.courtName = courtName;
     }
 
     public Long getId() { return id; }
@@ -38,4 +44,6 @@ public class BookingResponse {
     public BigDecimal getDepositAmount() { return depositAmount; }
     public LocalDateTime getBookingDateTime() { return bookingDateTime; }
     public String getCancelReason() { return cancelReason; }
+    public String getCustomerName() { return customerName; }
+    public String getCourtName() { return courtName; }
 }

@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sportsfacility_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: root
-    password: Admin123
+    password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -16,7 +16,6 @@ spring:
       hibernate:
         "[format_sql]": true
     open-in-view: false
-
 
   mail:
     host: smtp.gmail.com
@@ -32,6 +31,12 @@ spring:
           ssl:
             protocols: TLSv1.2
             trust: smtp.gmail.com
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
 
