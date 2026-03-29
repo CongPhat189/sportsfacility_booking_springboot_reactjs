@@ -13,6 +13,12 @@ import OwnerLayout from "./components/OwnerLayout"
 import OwnerCourtPage from "./pages/OwnerCourtPage"
 import OwnerSchedulePage from "./pages/OwnerSchedulePage"
 import OwnerBookingPage from "./pages/OwnerBookingPage"
+import HomePage from './pages/HomePage'
+import CourtDetailPage from './pages/CourtDetailPage'
+import ProfilePage from './pages/ProfilePage'
+
+
+
 
 // Các route bảo vệ
 function PrivateRoute({ children }) {
@@ -43,12 +49,16 @@ function App() {
           <Route path="/payment/failed" element={<PaymentFailedPage />} />
 
           {/* Private routes */}
+          <Route path="/profile" element={
+            <PrivateRoute><ProfilePage /></PrivateRoute>
+          } />
+          <Route path="/courts/:id" element={<CourtDetailPage />} />
           <Route path="/my-bookings" element={
             <PrivateRoute><BookingHistoryPage /></PrivateRoute>
           } />
 
           {/* Redirect root */}
-          <Route path="/" element={<Navigate to="/courts" replace />} />
+          <Route path="/" element={<HomePage />} />
 
           {/* Admin routes */}
           <Route path="/admin/*" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

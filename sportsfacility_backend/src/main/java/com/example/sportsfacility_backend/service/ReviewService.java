@@ -10,6 +10,8 @@ import com.example.sportsfacility_backend.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
+
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -46,5 +48,13 @@ public class ReviewService {
     public Optional<ReviewResponseDTO> getReviewByBookingId(Long bookingId) {
         return reviewRepository.findByBookingId(bookingId)
                 .map(ReviewResponseDTO::new);
+    }
+
+    @Transactional
+    public List<ReviewResponseDTO> getReviewsByCourtId(Long courtId) {
+        return reviewRepository.findByCourtIdOrderByCreatedAtDesc(courtId)
+                .stream()
+                .map(ReviewResponseDTO::new)
+                .toList();
     }
 }

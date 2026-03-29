@@ -12,6 +12,8 @@ public class BookingResponseDTO {
     private Long id;
     private Long courtId;
     private String courtName;
+    private String courtImageUrl;
+    private String courtAddress;
     private Long scheduleId;
     private LocalDateTime bookingDateTime;
     private BigDecimal totalAmount;
@@ -26,14 +28,16 @@ public class BookingResponseDTO {
         this.id = b.getId();
         this.courtId = b.getCourt().getId();
         this.courtName = b.getCourt().getName();
+        this.courtImageUrl = b.getCourt().getImageUrl();
+        this.courtAddress = b.getCourt().getAddress();
         this.scheduleId = b.getSchedule().getId();
         this.bookingDateTime = b.getBookingDateTime();
         this.totalAmount = b.getTotalAmount();
         this.depositAmount = b.getDepositAmount();
         this.status = b.getStatus();
         this.note = b.getNote();
-        this.scheduleStartTime = b.getSchedule().getStartTime();
-        this.scheduleEndTime = b.getSchedule().getEndTime();
+        this.scheduleStartTime = b.getStartTime();
+        this.scheduleEndTime = b.getEndTime();
 
         this.createdAt = b.getCreatedAt();
     }
@@ -41,6 +45,8 @@ public class BookingResponseDTO {
     public Long getId() { return id; }
     public Long getCourtId() { return courtId; }
     public String getCourtName() { return courtName; }
+    public String getCourtImageUrl() { return courtImageUrl; }
+    public String getCourtAddress()  { return courtAddress; }
     public Long getScheduleId() { return scheduleId; }
     public LocalDateTime getBookingDateTime() { return bookingDateTime; }
     public BigDecimal getTotalAmount() { return totalAmount; }

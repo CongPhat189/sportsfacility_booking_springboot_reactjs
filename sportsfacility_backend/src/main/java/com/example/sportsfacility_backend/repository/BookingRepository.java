@@ -6,7 +6,6 @@ import com.example.sportsfacility_backend.entity.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -68,4 +67,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Object[]> getOwnerRevenueSeparate(@Param("ownerId") Long ownerId,
                                            @Param("year") int year,
                                            @Param("month") Integer month);
+
+    @Query("SELECT COUNT(b) > 0 FROM Booking b " +
+        "WHERE b.court.id = :courtId " +
+        "AND FUNCTION('DATE', b.bookingDateTime) = :date " +
+        "AND b.status <> 'CANCELLED' " +
+        "AND b.startTime < :endTime AND b.endTime > :startTime")
+    boolean hasTimeOverlap(
+            @Param("courtId") Long courtId,
+            @Param("date") java.time.LocalDate date,
+            @Param("startTime") java.time.LocalTime startTime,
+            @Param("endTime") java.time.LocalTime endTime);
+                                       
 }

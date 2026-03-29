@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/payments/vnpay/callback",
                                 "/courts/search",
                                 "/courts/categories",
-                                "/courts/*/available-slots"
+                                "/courts/*/available-slots",
+                                "/courts/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/owner/**").hasRole("OWNER")

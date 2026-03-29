@@ -8,6 +8,9 @@ export const endpoints = {
     'register': '/auth/register',
     'login': '/auth/login',
     'current-user': '/user/profile',
+    'update-profile': 'user/profile',
+    'change-password': 'user/change-password',
+
 
 
     // Courts
@@ -26,6 +29,10 @@ export const endpoints = {
     // Reviews
     'create-review':  '/reviews',
     'booking-review': (id) => `/bookings/${id}/review`,
+
+    'court-detail':  (id) => `courts/${id}`,
+    'court-reviews': (id) => `courts/${id}/reviews`,
+
 
 
     // OWNER - COURT CRUD APIs
