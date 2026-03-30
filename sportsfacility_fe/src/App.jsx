@@ -19,6 +19,7 @@ import ProfilePage from './pages/ProfilePage'
 
 
 
+import ƠwnerRevenuePage from "./pages/OwnerRevenuePage"
 
 // Các route bảo vệ
 function PrivateRoute({ children }) {
@@ -74,6 +75,7 @@ function App() {
             <Route path="courts" element={<OwnerCourtPage />} />
             <Route path="schedule" element={<OwnerSchedulePage />} />
             <Route path="booking" element={<OwnerBookingPage />} />
+            <Route path="revenue" element={<ƠwnerRevenuePage />} />
 
             {/* Sau này thêm các route khác của Owner: finance, customers, settings */}
           </Route>

@@ -44,21 +44,24 @@ export const endpoints = {
     // 'owner-schedules': (courtId = "") => `/owner/schedules${courtId ? `/${courtId}` : ""}`,
 
     // OWNER - BOOKINGS
-    'owner-bookings': '/owner/bookings',
+    "owner-bookings": "/owner/bookings",
 
+    "owner-booking-detail": (id) => `/owner/bookings/${id}`,
 
+    "update-booking": (id) => `/owner/bookings/${id}`,
 
+    "delete-booking": (id) => `/owner/bookings/${id}`,
 
+    "confirm-booking": (id) => `/owner/bookings/${id}/confirm`,
 
+    "reject-booking": (id) => `/owner/bookings/${id}/reject`,
 
+    "checkin-booking": (id) => `/owner/bookings/${id}/checkin`,
 
+    "complete-booking": (id) => `/owner/bookings/${id}/complete`,
 
-
-
-
-
-
-
+    //OWNER - REVENUE
+    "owner-revenue": "/owner/revenue",
 
 
 

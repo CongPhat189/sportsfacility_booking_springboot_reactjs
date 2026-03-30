@@ -9,13 +9,13 @@ public class CourtResponse {
     private String description;
     private String imageUrl;
     private String status;
-
+    private String rejectReason;
     private Integer  categoryId;
     private String categoryName;
 
     public CourtResponse(Long id, String name, String address,
                          String description, String imageUrl, String status,
-                         Integer  categoryId, String categoryName) {
+                         Integer  categoryId, String categoryName,  String rejectReason) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -24,6 +24,7 @@ public class CourtResponse {
         this.status = status;
         this.categoryId = categoryId;
         this.categoryName = categoryName;
+        this.rejectReason = rejectReason;
     }
 
     public Long getId() { return id; }
@@ -35,4 +36,5 @@ public class CourtResponse {
 
     public Integer  getCategoryId() { return categoryId; }
     public String getCategoryName() { return categoryName; }
+    public String getRejectReason() { return rejectReason; }
 }

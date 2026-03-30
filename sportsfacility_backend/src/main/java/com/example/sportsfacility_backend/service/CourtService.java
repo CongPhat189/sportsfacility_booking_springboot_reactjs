@@ -20,153 +20,135 @@ import java.util.stream.Collectors;
 @Service
 public class CourtService {
 
-        @Autowired
-        private CourtRepository courtRepository;
+    @Autowired
+    private CourtRepository courtRepository;
 
-        @Autowired
-        private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-        @Autowired
-        private CourtCategoryRepository categoryRepository;
+    @Autowired
+    private CourtCategoryRepository categoryRepository;
 
+    // ================= SEARCH COURTS =================
+    @Transactional
+    public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId) {
+        return courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
+                .stream()
+                .map(CourtResponseDTO::new)
+                .toList();
+    }
 
-        @Transactional
-        public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId) {
-                return courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
-                        .stream()
-                        .map(CourtResponseDTO::new)
-                        .toList();
+    // ================= CREATE =================
+    public CourtResponse createCourt(CourtRequest request, String email) {
+
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
+
+        CourtCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category không tồn tại"));
+
+        Court court = new Court();
+        court.setOwner(owner);
+        court.setCategory(category);
+        court.setName(request.getName());
+        court.setAddress(request.getAddress());
+        court.setDescription(request.getDescription());
+        court.setImageUrl(request.getImageUrl());
+        court.setStatus(CourtStatus.PENDING);
+        court.setRejectReason(null); // mặc định null khi tạo mới
+
+        courtRepository.save(court);
+
+        return mapToCourtResponse(court);
+    }
+
+    // ================= GET ALL =================
+    public List<CourtResponse> getAllCourts() {
+        return courtRepository.findAll()
+                .stream()
+                .map(this::mapToCourtResponse)
+                .collect(Collectors.toList());
+    }
+
+    // ================= InActive =================
+    @Transactional
+    public CourtResponse deactivateCourt(Long id) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sân không tồn tại!"));
+
+        court.setStatus(CourtStatus.INACTIVE);  // đổi status thành INACTIVE
+        // save không bắt buộc trong transactional, Hibernate tự flush
+        return mapToCourtResponse(court);
+    }
+
+    // ================= Active =================
+    @Transactional
+    public CourtResponse activateCourt(Long id) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sân không tồn tại!"));
+        court.setStatus(CourtStatus.ACTIVE);
+        return mapToCourtResponse(court);
+    }
+
+    // ================= GET BY ID =================
+    public CourtResponse getCourtById(Long id) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Court không tồn tại"));
+
+        return mapToCourtResponse(court);
+    }
+
+    // ================= UPDATE =================
+    public CourtResponse updateCourt(Long id, CourtRequest request) {
+
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Court không tồn tại"));
+
+        CourtCategory category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category không tồn tại"));
+
+        // Cập nhật thông tin cơ bản
+        court.setCategory(category);
+        court.setName(request.getName());
+        court.setAddress(request.getAddress());
+        court.setDescription(request.getDescription());
+        court.setImageUrl(request.getImageUrl());
+
+        // Nếu trạng thái hiện tại là REJECTED thì đổi thành PENDING
+        if (court.getStatus() == CourtStatus.REJECTED) {
+            court.setStatus(CourtStatus.PENDING);
+            court.setRejectReason(null); // reset lý do bị từ chối
         }
 
-        // ================= CREATE =================
-        public CourtResponse createCourt(CourtRequest request, String email) {
+        courtRepository.save(court);
 
-                User owner = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
+        return mapToCourtResponse(court);
+    }
 
-                CourtCategory category = categoryRepository.findById(request.getCategoryId())
-                        .orElseThrow(() -> new RuntimeException("Category không tồn tại"));
+    // ================= GET BY OWNER =================
+    public List<CourtResponse> getCourtsByOwner(String email) {
 
-                Court court = new Court();
-                court.setOwner(owner);
-                court.setCategory(category);
-                court.setName(request.getName());
-                court.setAddress(request.getAddress());
-                court.setDescription(request.getDescription());
-                court.setImageUrl(request.getImageUrl());
-                court.setStatus(CourtStatus.PENDING);
+        User owner = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
 
-                courtRepository.save(court);
+        return courtRepository.findByOwnerId(owner.getId())
+                .stream()
+                .map(this::mapToCourtResponse)
+                .collect(Collectors.toList());
+    }
 
-                return new CourtResponse(
-                        court.getId(),
-                        court.getName(),
-                        court.getAddress(),
-                        court.getDescription(),
-                        court.getImageUrl(),
-                        court.getStatus().name(),
-                        court.getCategory().getId(),
-                        court.getCategory().getName()
-                );
-        }
-
-        // ================= GET ALL =================
-        public List<CourtResponse> getAllCourts() {
-                return courtRepository.findAll()
-                        .stream()
-                        .map(c -> new CourtResponse(
-                                c.getId(),
-                                c.getName(),
-                                c.getAddress(),
-                                c.getDescription(),
-                                c.getImageUrl(),
-                                c.getStatus().name(),
-                                c.getCategory().getId(),
-                                c.getCategory().getName()
-                        ))
-                        .collect(Collectors.toList());
-        }
-
-        // ================= DELETE =================
-        public void deleteCourt(Long id) {
-                courtRepository.deleteById(id);
-        }
-
-        // ================= GET BY ID =================
-        public CourtResponse getCourtById(Long id){
-
-                Court court = courtRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Court không tồn tại"));
-
-                return new CourtResponse(
-                        court.getId(),
-                        court.getName(),
-                        court.getAddress(),
-                        court.getDescription(),
-                        court.getImageUrl(),
-                        court.getStatus().name(),
-                        court.getCategory().getId(),
-                        court.getCategory().getName()
-                );
-        }
-
-        // ================= UPDATE =================
-        public CourtResponse updateCourt(Long id, CourtRequest request) {
-
-                Court court = courtRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Court không tồn tại"));
-
-                CourtCategory category = categoryRepository.findById(request.getCategoryId())
-                        .orElseThrow(() -> new RuntimeException("Category không tồn tại"));
-
-                court.setCategory(category);
-                court.setName(request.getName());
-                court.setAddress(request.getAddress());
-                court.setDescription(request.getDescription());
-                court.setImageUrl(request.getImageUrl());
-
-                court.setStatus(CourtStatus.PENDING);
-
-                courtRepository.save(court);
-
-                return new CourtResponse(
-                        court.getId(),
-                        court.getName(),
-                        court.getAddress(),
-                        court.getDescription(),
-                        court.getImageUrl(),
-                        court.getStatus().name(),
-                        court.getCategory().getId(),
-                        court.getCategory().getName()
-                );
-        }
-
-        // ================= GET BY OWNER =================
-        public List<CourtResponse> getCourtsByOwner(String email){
-
-                User owner = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("Owner không tồn tại"));
-
-                return courtRepository.findByOwnerId(owner.getId())
-                        .stream()
-                        .map(c -> new CourtResponse(
-                                c.getId(),
-                                c.getName(),
-                                c.getAddress(),
-                                c.getDescription(),
-                                c.getImageUrl(),
-                                c.getStatus().name(),
-                                c.getCategory().getId(),
-                                c.getCategory().getName()
-                        ))
-                        .collect(Collectors.toList());
-        }
-
-        @Transactional
-        public CourtResponseDTO getCourtDTOById(Long id) {
-                Court court = courtRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
-                return new CourtResponseDTO(court);
-        }
-
+    // ================= PRIVATE MAPPER =================
+    private CourtResponse mapToCourtResponse(Court court) {
+        return new CourtResponse(
+                court.getId(),
+                court.getName(),
+                court.getAddress(),
+                court.getDescription(),
+                court.getImageUrl(),
+                court.getStatus().name(),
+                court.getCategory().getId(),
+                court.getCategory().getName(),
+                court.getRejectReason() // <-- thêm rejectReason
+        );
+    }
 }

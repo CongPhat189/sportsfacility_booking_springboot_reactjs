@@ -14,6 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +32,6 @@ public class CourtScheduleService {
     @Autowired
     private UserRepository userRepository;
 
-
     private Long getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -42,15 +44,75 @@ public class CourtScheduleService {
                 .getId();
     }
 
+    // ================= VALIDATE TIME =================
+    private void validateTime(
+            Court court,
+            Byte dayOfWeek,
+            LocalTime start,
+            LocalTime end,
+            Long ignoreId
+    ) {
+
+        // end > start
+        if (!end.isAfter(start)) {
+            throw new RuntimeException("Giờ kết thúc phải lớn hơn giờ bắt đầu");
+        }
+
+        // convert Java day (1-7) -> DB day (0-6)
+        int todayJava = LocalDate.now().getDayOfWeek().getValue(); // 1-7
+        byte today = (byte) (todayJava % 7); // convert -> 0-6
+
+        // nếu là hôm nay -> không cho quá khứ
+        if (dayOfWeek == today) {
+            LocalTime now = LocalTime.now();
+            if (start.isBefore(now)) {
+                throw new RuntimeException("Không thể tạo lịch trong quá khứ");
+            }
+        }
+
+        // check overlap
+        List<CourtSchedule> schedules =
+                scheduleRepository.findByCourtIdAndDayOfWeek(court.getId(), dayOfWeek);
+
+        for (CourtSchedule s : schedules) {
+
+            if (ignoreId != null && s.getId().equals(ignoreId))
+                continue;
+
+            if (start.isBefore(s.getEndTime()) && s.getStartTime().isBefore(end)) {
+                throw new RuntimeException(
+                        "Khung giờ bị trùng: "
+                                + s.getStartTime()
+                                + " - "
+                                + s.getEndTime()
+                );
+            }
+        }
+    }
+
+    // ================= CREATE =================
     public CourtScheduleResponse create(CourtScheduleRequest request){
+
         Long userId = getCurrentUserId();
 
-        Court court = courtRepository.findByIdAndStatus(request.getCourtId(), CourtStatus.ACTIVE)
-                .orElseThrow(() -> new RuntimeException("Court không tồn tại hoặc không ACTIVE"));
+        Court court = courtRepository.findByIdAndStatus(
+                request.getCourtId(),
+                CourtStatus.ACTIVE
+        ).orElseThrow(() ->
+                new RuntimeException("Court không tồn tại hoặc không ACTIVE"));
 
         if (!court.getOwner().getId().equals(userId)) {
             throw new RuntimeException("Bạn không có quyền tạo schedule cho sân này");
         }
+
+        // validate
+        validateTime(
+                court,
+                request.getDayOfWeek(),
+                request.getStartTime(),
+                request.getEndTime(),
+                null
+        );
 
         CourtSchedule schedule = new CourtSchedule();
         schedule.setCourt(court);
@@ -65,25 +127,37 @@ public class CourtScheduleService {
         return mapToResponse(schedule);
     }
 
+    // ================= GET ALL =================
     public List<CourtScheduleResponse> getAll(){
         Long userId = getCurrentUserId();
 
-        return scheduleRepository.findByOwnerIdWithCourt(userId).stream()
+        return scheduleRepository.findByOwnerIdWithCourt(userId)
+                .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    // ================= UPDATE =================
     @Transactional
     public CourtScheduleResponse update(Long id, CourtScheduleRequest request){
+
         Long userId = getCurrentUserId();
 
-        // Dùng fetch join court + owner để tránh LazyInitializationException
         CourtSchedule schedule = scheduleRepository.findByIdWithCourtAndOwner(id)
                 .orElseThrow(() -> new RuntimeException("Schedule không tồn tại"));
 
         if (!schedule.getCourt().getOwner().getId().equals(userId)) {
             throw new RuntimeException("Bạn không có quyền cập nhật schedule này");
         }
+
+        // validate
+        validateTime(
+                schedule.getCourt(),
+                request.getDayOfWeek(),
+                request.getStartTime(),
+                request.getEndTime(),
+                schedule.getId()
+        );
 
         schedule.setDayOfWeek(request.getDayOfWeek());
         schedule.setStartTime(request.getStartTime());
@@ -94,7 +168,9 @@ public class CourtScheduleService {
         return mapToResponse(scheduleRepository.save(schedule));
     }
 
+    // ================= DELETE =================
     public void delete(Long id){
+
         Long userId = getCurrentUserId();
 
         CourtSchedule schedule = scheduleRepository.findByIdWithCourtAndOwner(id)
@@ -107,6 +183,7 @@ public class CourtScheduleService {
         scheduleRepository.deleteById(id);
     }
 
+    // ================= MAP =================
     private CourtScheduleResponse mapToResponse(CourtSchedule schedule){
         return new CourtScheduleResponse(
                 schedule.getId(),

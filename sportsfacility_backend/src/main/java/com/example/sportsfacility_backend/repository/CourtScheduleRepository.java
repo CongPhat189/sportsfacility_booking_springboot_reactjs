@@ -11,9 +11,10 @@ import java.util.Optional;
 
 public interface CourtScheduleRepository extends JpaRepository<CourtSchedule, Long> {
 
-        // Lấy tất cả schedule của owner, fetch court luôn
-        @Query("SELECT cs FROM CourtSchedule cs JOIN FETCH cs.court c WHERE c.owner.id = :ownerId")
-        List<CourtSchedule> findByOwnerIdWithCourt(@Param("ownerId") Long ownerId);
+    // Lấy tất cả schedule của owner, fetch court luôn
+    @Query("SELECT cs FROM CourtSchedule cs JOIN FETCH cs.court c WHERE c.owner.id = :ownerId")
+    List<CourtSchedule> findByOwnerIdWithCourt(@Param("ownerId") Long ownerId);
+    List<CourtSchedule> findByCourtIdAndDayOfWeek(Long courtId, Byte dayOfWeek);
 
         // Lấy schedule theo id, fetch court và owner luôn
         @Query("SELECT cs FROM CourtSchedule cs " +
@@ -45,7 +46,7 @@ public interface CourtScheduleRepository extends JpaRepository<CourtSchedule, Lo
                 @Param("startTime") LocalTime startTime,
                 @Param("endTime") LocalTime endTime);
 
-        
+
         @Query("SELECT s FROM CourtSchedule s WHERE s.court.id = :courtId " +
                 "AND s.dayOfWeek = :dayOfWeek AND s.isActive = true")
         List<CourtSchedule> findAllActiveSlots(@Param("courtId") Long courtId,

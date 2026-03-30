@@ -20,9 +20,9 @@ public class OwnerRevenueService {
 
         List<Object[]> result = bookingRepository.getOwnerRevenueSeparate(ownerId, year, month);
 
-        // nếu không có dữ liệu
         if(result.isEmpty()){
             return new RevenueResponseDTO(
+                    new RevenueItemDTO(0L, 0.0, 0.0),
                     new RevenueItemDTO(0L, 0.0, 0.0),
                     new RevenueItemDTO(0L, 0.0, 0.0)
             );
@@ -42,7 +42,13 @@ public class OwnerRevenueService {
                 toDouble(r[5])
         );
 
-        return new RevenueResponseDTO(completed, cancelled);
+        RevenueItemDTO expired = new RevenueItemDTO(
+                toLong(r[6]),
+                toDouble(r[7]),
+                toDouble(r[8])
+        );
+
+        return new RevenueResponseDTO(completed, cancelled, expired);
     }
 
     // 🔥 tránh null + lỗi cast
