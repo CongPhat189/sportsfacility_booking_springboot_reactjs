@@ -32,6 +32,12 @@ spring:
           ssl:
             protocols: TLSv1.2
             trust: smtp.gmail.com
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
 

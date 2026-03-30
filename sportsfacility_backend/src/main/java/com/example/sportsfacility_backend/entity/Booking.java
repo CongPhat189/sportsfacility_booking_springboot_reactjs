@@ -7,6 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookings")
@@ -27,6 +28,12 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id", nullable = false)
     private CourtSchedule schedule;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
 
     @Column(name = "booking_date_time", nullable = false)
     private LocalDateTime bookingDateTime;
@@ -69,13 +76,16 @@ public class Booking {
     public Booking() {}
 
     public Booking(Long id, User customer, Court court, CourtSchedule schedule,
-                   LocalDateTime bookingDateTime, BigDecimal totalAmount, BigDecimal depositAmount,
-                   BookingStatus status, String cancelReason, String note,
-                   LocalDateTime createdAt, LocalDateTime updatedAt) {
+                LocalTime startTime, LocalTime endTime,
+                LocalDateTime bookingDateTime, BigDecimal totalAmount, BigDecimal depositAmount,
+                BookingStatus status, String cancelReason, String note,
+                LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.customer = customer;
         this.court = court;
         this.schedule = schedule;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.bookingDateTime = bookingDateTime;
         this.totalAmount = totalAmount;
         this.depositAmount = depositAmount;
@@ -95,6 +105,10 @@ public class Booking {
     public Court getCourt() { return court; }
 
     public CourtSchedule getSchedule() { return schedule; }
+
+    public LocalTime getStartTime() { return startTime; }
+
+    public LocalTime getEndTime() { return endTime; }
 
     public LocalDateTime getBookingDateTime() { return bookingDateTime; }
 
@@ -127,6 +141,10 @@ public class Booking {
     public void setCourt(Court court) { this.court = court; }
 
     public void setSchedule(CourtSchedule schedule) { this.schedule = schedule; }
+
+    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+
+    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
 
     public void setBookingDateTime(LocalDateTime bookingDateTime) { this.bookingDateTime = bookingDateTime; }
 

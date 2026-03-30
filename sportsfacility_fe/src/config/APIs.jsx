@@ -8,6 +8,9 @@ export const endpoints = {
     'register': '/auth/register',
     'login': '/auth/login',
     'current-user': '/user/profile',
+    'update-profile': 'user/profile',
+    'change-password': 'user/change-password',
+
 
 
     // Courts
@@ -27,6 +30,10 @@ export const endpoints = {
     'create-review':  '/reviews',
     'booking-review': (id) => `/bookings/${id}/review`,
 
+    'court-detail':  (id) => `courts/${id}`,
+    'court-reviews': (id) => `courts/${id}/reviews`,
+
+
 
     // OWNER - COURT CRUD APIs
     'owner-courts': '/owner/courts',
@@ -37,21 +44,24 @@ export const endpoints = {
     // 'owner-schedules': (courtId = "") => `/owner/schedules${courtId ? `/${courtId}` : ""}`,
 
     // OWNER - BOOKINGS
-    'owner-bookings': '/owner/bookings',
+    "owner-bookings": "/owner/bookings",
 
+    "owner-booking-detail": (id) => `/owner/bookings/${id}`,
 
+    "update-booking": (id) => `/owner/bookings/${id}`,
 
+    "delete-booking": (id) => `/owner/bookings/${id}`,
 
+    "confirm-booking": (id) => `/owner/bookings/${id}/confirm`,
 
+    "reject-booking": (id) => `/owner/bookings/${id}/reject`,
 
+    "checkin-booking": (id) => `/owner/bookings/${id}/checkin`,
 
+    "complete-booking": (id) => `/owner/bookings/${id}/complete`,
 
-
-
-
-
-
-
+    //OWNER - REVENUE
+    "owner-revenue": "/owner/revenue",
 
 
 

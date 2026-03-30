@@ -48,8 +48,12 @@ public class OwnerBookingController {
     }
     // CONFIRM BOOKING
     @PutMapping("/{id}/confirm")
-    public BookingResponse confirmBooking(@PathVariable Long id) {
-        return ownerBookingService.confirmBooking(id);
+    public Object confirmBooking(@PathVariable Long id) {
+        try {
+            return ownerBookingService.confirmBooking(id);
+        } catch (Exception e) {
+            return e.getMessage(); // 🔥 in lỗi ra Postman
+        }
     }
 
     // REJECT BOOKING

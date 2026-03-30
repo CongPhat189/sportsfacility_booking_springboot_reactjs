@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -50,22 +51,67 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Object[]> getRevenueLast3Months(int month, int year);
 
     @Query("""
-                SELECT 
-                    COUNT(CASE WHEN b.status = 'COMPLETED' THEN 1 END),
-                    SUM(CASE WHEN b.status = 'COMPLETED' THEN b.totalAmount ELSE 0 END),
-                    SUM(CASE WHEN b.status = 'COMPLETED' THEN b.totalAmount * (1 - c.commissionRate / 100) ELSE 0 END),
-            
-                    COUNT(CASE WHEN b.status = 'CANCELLED' THEN 1 END),
-                    SUM(CASE WHEN b.status = 'CANCELLED' THEN b.depositAmount ELSE 0 END),
-                    SUM(CASE WHEN b.status = 'CANCELLED' THEN b.depositAmount * (1 - c.commissionRate / 100) ELSE 0 END)
-            
-                FROM Booking b
-                JOIN b.court c
-                WHERE c.owner.id = :ownerId
-                  AND YEAR(b.bookingDateTime) = :year
-                  AND (:month IS NULL OR MONTH(b.bookingDateTime) = :month)
-            """)
+    SELECT 
+        COUNT(CASE WHEN b.status = 'COMPLETED' THEN 1 END),
+        SUM(CASE WHEN b.status = 'COMPLETED' THEN b.totalAmount ELSE 0 END),
+        SUM(CASE WHEN b.status = 'COMPLETED' 
+                 THEN b.totalAmount * (1 - c.commissionRate / 100) ELSE 0 END),
+
+        COUNT(CASE WHEN b.status = 'CANCELLED' THEN 1 END),
+        0,
+        0,
+
+        COUNT(CASE WHEN b.status = 'EXPIRED' THEN 1 END),
+        SUM(CASE WHEN b.status = 'EXPIRED' THEN b.depositAmount ELSE 0 END),
+        SUM(CASE WHEN b.status = 'EXPIRED'
+                 THEN b.depositAmount * (1 - c.commissionRate / 100) ELSE 0 END)
+
+    FROM Booking b
+    JOIN b.court c
+    WHERE c.owner.id = :ownerId
+      AND YEAR(b.bookingDateTime) = :year
+      AND (:month IS NULL OR MONTH(b.bookingDateTime) = :month)
+""")
     List<Object[]> getOwnerRevenueSeparate(@Param("ownerId") Long ownerId,
                                            @Param("year") int year,
                                            @Param("month") Integer month);
+
+    @Query("""
+    SELECT b FROM Booking b
+    JOIN FETCH b.customer
+    JOIN FETCH b.court
+    JOIN FETCH b.schedule
+    WHERE b.court.owner.id = :ownerId
+""")
+    List<Booking> findByOwnerId(@Param("ownerId") Long ownerId);
+
+    @Query("""
+    SELECT b FROM Booking b
+    JOIN FETCH b.court c
+    JOIN FETCH c.owner
+    JOIN FETCH b.customer
+    WHERE b.id = :id
+""")
+    Booking findByIdWithCourtAndOwner(Long id);
+
+    @Query("SELECT COUNT(b) > 0 FROM Booking b " +
+        "WHERE b.court.id = :courtId " +
+        "AND FUNCTION('DATE', b.bookingDateTime) = :date " +
+        "AND b.status <> 'CANCELLED' " +
+        "AND b.startTime < :endTime AND b.endTime > :startTime")
+    boolean hasTimeOverlap(
+            @Param("courtId") Long courtId,
+            @Param("date") java.time.LocalDate date,
+            @Param("startTime") java.time.LocalTime startTime,
+            @Param("endTime") java.time.LocalTime endTime);
+
+    @Query("SELECT b FROM Booking b WHERE b.court.id = :courtId " +
+        "AND FUNCTION('DATE', b.bookingDateTime) = :date " +
+        "AND b.schedule.id = :scheduleId " +
+        "AND b.status <> 'CANCELLED'")
+    List<Booking> findBookingsInSlot(@Param("courtId") Long courtId,
+                                    @Param("date") LocalDate date,
+                                    @Param("scheduleId") Long scheduleId);
+
+
 }
