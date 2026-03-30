@@ -151,4 +151,11 @@ public class CourtService {
                 court.getRejectReason() // <-- thêm rejectReason
         );
     }
+
+    @Transactional
+    public CourtResponseDTO getCourtDTOById(Long id) {
+        Court court = courtRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
+        return new CourtResponseDTO(court);
+    }
 }
