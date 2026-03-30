@@ -52,11 +52,12 @@ export default function CourtSearchPage() {
   axios.get(endpoints['courts-search'], {
     params: { keyword: combined, categoryId: cat || undefined }
   }).then(res => setCourts(res.data)).catch(() => setCourts([])).finally(() => setLoading(false))
-  }, [])
+  }, [searchParams])
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      handleSearch(null, categoryId)
+      const cat = searchParams.get('categoryId') || ''
+      handleSearch(null, cat)
     }, 500)
     return () => clearTimeout(timer)
   }, [keyword])

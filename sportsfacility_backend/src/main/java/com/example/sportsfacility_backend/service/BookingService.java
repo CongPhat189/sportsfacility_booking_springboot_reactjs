@@ -5,6 +5,7 @@ import com.example.sportsfacility_backend.dto.BookingResponseDTO;
 import com.example.sportsfacility_backend.dto.CancelBookingRequest;
 import com.example.sportsfacility_backend.dto.CancelBookingResponse;
 import com.example.sportsfacility_backend.dto.ScheduleResponseDTO;
+import com.example.sportsfacility_backend.dto.TimeRangeDTO;
 import com.example.sportsfacility_backend.entity.Booking;
 import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.entity.CourtSchedule;
@@ -14,7 +15,8 @@ import com.example.sportsfacility_backend.repository.BookingRepository;
 import com.example.sportsfacility_backend.repository.CourtRepository;
 import com.example.sportsfacility_backend.repository.CourtScheduleRepository;
 import com.example.sportsfacility_backend.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,14 +40,20 @@ public class BookingService {
 
     @Transactional
     public List<ScheduleResponseDTO> getAvailableSlots(Long courtId, LocalDate date) {
-        Byte dayOfWeek = (byte) (date.getDayOfWeek().getValue() % 7); // 1=Mon..6=Sat, 0=Sun
-        return scheduleRepository.findAvailableSlots(courtId, dayOfWeek, date)
-                .stream()
-                .map(ScheduleResponseDTO::new)
-                .toList();
+        Byte dayOfWeek = (byte) (date.getDayOfWeek().getValue() % 7);
+        List<CourtSchedule> slots = scheduleRepository.findAllActiveSlots(courtId, dayOfWeek);
+
+        return slots.stream().map(slot -> {
+            List<Booking> bookings = bookingRepository.findBookingsInSlot(courtId, date, slot.getId());
+            List<TimeRangeDTO> bookedRanges = bookings.stream()
+                    .map(b -> new TimeRangeDTO(b.getStartTime(), b.getEndTime()))
+                    .toList();
+            return new ScheduleResponseDTO(slot, bookedRanges);
+        }).toList();
     }
 
-    @Transactional
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public BookingResponseDTO createBooking(BookingRequestDTO req, String customerEmail) {
 
         User customer = userRepository.findByEmail(customerEmail)

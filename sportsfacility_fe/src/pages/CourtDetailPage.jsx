@@ -20,6 +20,7 @@ export default function CourtDetailPage() {
   const today = new Date().toISOString().split('T')[0]
   const [calendarDate, setCalendarDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(today)
+  const [selectedSlot, setSelectedSlot] = useState(null)
 
   const [slots, setSlots] = useState([])
   const [slotsLoading, setSlotsLoading] = useState(false)
@@ -35,10 +36,16 @@ export default function CourtDetailPage() {
   ]
 
   const services = [
-    { icon: <CircleDot className="w-7 h-7" />, label: 'Cho thuê bóng', desc: 'Bóng thi đấu tiêu chuẩn cho các trận giao hữu chuyên nghiệp.' },
+    { icon: <CircleDot className="w-7 h-7" />, label: 'Cho thuê dụng cụ', desc: 'Dụng cụ thi đấu tiêu chuẩn cho mọi môn thể thao.' },
     { icon: <Shirt className="w-7 h-7" />, label: 'Cho thuê áo bib', desc: 'Hỗ trợ phân chia đội hình với bộ áo tập nhiều màu sắc.' },
     { icon: <Heart className="w-7 h-7" />, label: 'Sơ cứu y tế', desc: 'Luôn sẵn sàng bộ dụng cụ y tế cơ bản cho các tình huống cần thiết.' },
   ]
+
+  const handleSlotClick = (slot) => {
+    setSelectedSlot(slot)
+    setStartTime(slot.startTime.substring(0, 5))
+    setEndTime(slot.endTime.substring(0, 5))
+  }
 
   const matchingSlot = slots.find(s => {
     const slotStart = s.startTime.substring(0, 5)
@@ -49,6 +56,11 @@ export default function CourtDetailPage() {
     ? (new Date(`2000-01-01T${endTime}`) - new Date(`2000-01-01T${startTime}`)) / 3600000 : 0
   const totalAmount = matchingSlot ? durationHours * matchingSlot.price : 0
   const depositAmount = totalAmount * 0.5
+  const hasConflict = startTime && endTime && slots.some(s =>
+    s.bookedRanges?.some(r =>
+      startTime < r.endTime.substring(0, 5) && endTime > r.startTime.substring(0, 5)
+    )
+  )
   const avgRating = reviews.length > 0
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : null
   const DAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -82,7 +94,7 @@ export default function CourtDetailPage() {
       setStartTime('')
       setEndTime('')
       try {
-        const res = await authAPIs().get(endpoints['available-slots'](id), { params: { date: selectedDate } })
+        const res = await axios.get(endpoints['available-slots'](id), { params: { date: selectedDate } })
         setSlots(res.data)
       } catch {
         setSlots([])
@@ -133,38 +145,24 @@ export default function CourtDetailPage() {
             <ChevronLeft className="w-4 h-4" /> Quay lại danh sách sân
           </button>
           {/* Image Gallery */}
-          <div className="grid grid-cols-3 gap-2 h-[420px] mb-4">
-            <div className="col-span-2 relative overflow-hidden rounded-l-2xl">
-              <img
-                src={court.imageUrl || 'https://placehold.co/800x420?text=No+Image'}
-                alt={court.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 text-white">
-                <h1 className="text-3xl font-black">{court.name}</h1>
-                <p className="flex items-center gap-1 text-sm mt-1 opacity-90">
-                  <MapPin className="w-3.5 h-3.5" /> {court.address}
-                </p>
+          <div className="relative h-[420px] mb-4 overflow-hidden rounded-2xl">
+            <img
+              src={court.imageUrl || 'https://placehold.co/1200x420?text=No+Image'}
+              alt={court.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4 text-white">
+              <h1 className="text-3xl font-black">{court.name}</h1>
+              <p className="flex items-center gap-1 text-sm mt-1 opacity-90">
+                <MapPin className="w-3.5 h-3.5" /> {court.address}
+              </p>
+            </div>
+            {avgRating && (
+              <div className="absolute bottom-4 right-4 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                ★ {avgRating}
               </div>
-              {avgRating && (
-                <div className="absolute bottom-4 right-4 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                  ★ {avgRating}
-                </div>
-              )}
-            </div>
-            <div className="col-span-1 grid grid-rows-2 gap-2">
-              <img
-                src={court.imageUrl || 'https://placehold.co/400x200?text=No+Image'}
-                alt={court.name}
-                className="w-full h-full object-cover rounded-tr-2xl"
-              />
-              <img
-                src={court.imageUrl || 'https://placehold.co/400x200?text=No+Image'}
-                alt={court.name}
-                className="w-full h-full object-cover rounded-br-2xl"
-              />
-            </div>
+            )}
           </div>
           {/* Amenities */}
           <div className="flex gap-6 py-4 border-b mb-8">
@@ -283,12 +281,28 @@ export default function CourtDetailPage() {
                 {slotsLoading ? (
                   <p className="text-sm text-gray-400 mb-4">Đang tải khung giờ...</p>
                 ) : slots.length > 0 ? (
-                  <div className="mb-4 bg-gray-50 rounded-xl p-3">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Bảng giá theo khung giờ</p>
+                  <div className="mb-4 space-y-2">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Chọn khung giờ</p>
                     {slots.map(s => (
-                      <div key={s.id} className="flex justify-between text-sm py-1.5 border-b last:border-0">
-                        <span className="text-gray-600">{s.startTime.substring(0, 5)} - {s.endTime.substring(0, 5)}</span>
-                        <span className="font-semibold text-green-600">{s.price?.toLocaleString('vi-VN')}đ</span>
+                      <div key={s.id}
+                        onClick={() => handleSlotClick(s)}
+                        className={`rounded-xl p-3 border-2 cursor-pointer transition
+                          ${selectedSlot?.id === s.id ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-green-300'}`}>
+                        <div className="flex justify-between text-sm font-semibold">
+                          <span>{s.startTime.substring(0, 5)} - {s.endTime.substring(0, 5)}</span>
+                          <span className="text-green-600">{s.price?.toLocaleString('vi-VN')}đ/giờ</span>
+                        </div>
+                        {s.bookedRanges?.length > 0 ? (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {s.bookedRanges.map((r, i) => (
+                              <span key={i} className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">
+                                ⛔ {r.startTime.substring(0, 5)} - {r.endTime.substring(0, 5)}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-xs text-green-600 mt-1">✅ Còn trống hoàn toàn</p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -316,6 +330,9 @@ export default function CourtDetailPage() {
                 {startTime && endTime && !matchingSlot && (
                   <p className="text-red-500 text-xs mb-3">⚠ Khoảng giờ không hợp lệ.</p>
                 )}
+                {hasConflict && matchingSlot && (
+                  <p className="text-red-500 text-xs mb-3">⚠ Khoảng giờ này trùng với lịch đã đặt.</p>
+                )}
 
                 {/* Tóm tắt giá */}
                 {matchingSlot && durationHours > 0 && (
@@ -335,12 +352,18 @@ export default function CourtDetailPage() {
                   value={note} onChange={e => setNote(e.target.value)} />
 
                 <button
-                  disabled={!matchingSlot || durationHours <= 0 || booking}
+                  disabled={!matchingSlot || durationHours <= 0 || booking || hasConflict}
                   onClick={handleBooking}
                   className="w-full bg-green-500 text-white py-3 rounded-xl font-bold text-base hover:bg-green-600 disabled:opacity-50 transition">
                   {booking ? 'Đang xử lý...' : 'Đặt sân ngay'}
                 </button>
-                <p className="text-xs text-gray-400 text-center mt-2">
+                {matchingSlot && durationHours > 0 && (
+                  <p className="text-xs text-blue-500 text-center mt-2">
+                    💳 Bạn sẽ thanh toán <strong>{depositAmount.toLocaleString('vi-VN')}đ</strong> tiền cọc ngay bây giờ.
+                    Phần còn lại thanh toán tại sân.
+                  </p>
+                )}
+                <p className="text-xs text-gray-400 text-center mt-1">
                   Bằng việc nhấn "Đặt sân ngay", bạn đồng ý với các điều khoản dịch vụ.
                 </p>
               </div>

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -78,5 +79,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("date") java.time.LocalDate date,
             @Param("startTime") java.time.LocalTime startTime,
             @Param("endTime") java.time.LocalTime endTime);
+
+    @Query("SELECT b FROM Booking b WHERE b.court.id = :courtId " +
+        "AND FUNCTION('DATE', b.bookingDateTime) = :date " +
+        "AND b.schedule.id = :scheduleId " +
+        "AND b.status <> 'CANCELLED'")
+    List<Booking> findBookingsInSlot(@Param("courtId") Long courtId,
+                                    @Param("date") LocalDate date,
+                                    @Param("scheduleId") Long scheduleId);
+
                                        
 }

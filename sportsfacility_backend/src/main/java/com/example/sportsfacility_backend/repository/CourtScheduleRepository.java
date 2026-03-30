@@ -45,6 +45,11 @@ public interface CourtScheduleRepository extends JpaRepository<CourtSchedule, Lo
                 @Param("startTime") LocalTime startTime,
                 @Param("endTime") LocalTime endTime);
 
+        
+        @Query("SELECT s FROM CourtSchedule s WHERE s.court.id = :courtId " +
+                "AND s.dayOfWeek = :dayOfWeek AND s.isActive = true")
+        List<CourtSchedule> findAllActiveSlots(@Param("courtId") Long courtId,
+                                                @Param("dayOfWeek") Byte dayOfWeek);
 
 
 
