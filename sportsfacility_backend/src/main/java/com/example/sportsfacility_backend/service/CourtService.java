@@ -13,7 +13,9 @@ import com.example.sportsfacility_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.example.sportsfacility_backend.repository.ReviewRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,16 +29,44 @@ public class CourtService {
     private UserRepository userRepository;
 
     @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
     private CourtCategoryRepository categoryRepository;
 
     // ================= SEARCH COURTS =================
     @Transactional
-    public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId) {
-        return courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
+    public List<CourtResponseDTO> searchCourts(String keyword, Integer categoryId, String sortBy) {
+        List<CourtResponseDTO> dtos = courtRepository.search(keyword, categoryId, CourtStatus.ACTIVE)
                 .stream()
-                .map(CourtResponseDTO::new)
-                .toList();
-    }
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+
+        if ("rating".equals(sortBy)) {
+                dtos.sort(Comparator.comparingDouble(
+                dto -> -(dto.getAverageRating() != null ? dto.getAverageRating() : 0.0)
+                ));
+        }
+        return dtos;
+        }
+
+
+    private CourtResponseDTO toDTO(Court court) {
+        Double avg = reviewRepository.getAverageRatingByCourtId(court.getId());
+        Long count = reviewRepository.countByCourtId(court.getId());
+        return new CourtResponseDTO(court, avg, count);
+        }
+
+        public List<CourtResponseDTO> getTopRatedCourts(int limit) {
+        return courtRepository.findByStatus(CourtStatus.ACTIVE)
+                .stream().map(this::toDTO)
+                .sorted(Comparator.comparingDouble(
+                dto -> -(dto.getAverageRating() != null ? dto.getAverageRating() : 0.0)
+                ))
+                .limit(limit)
+                .collect(Collectors.toList());
+        }
+
 
     // ================= CREATE =================
     public CourtResponse createCourt(CourtRequest request, String email) {
