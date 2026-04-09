@@ -1,35 +1,172 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { authAPIs, endpoints } from "../config/APIs";
 import { CheckCircle, XCircle, Clock, TrendingUp, Search } from "lucide-react";
+import { Chart, registerables } from "chart.js";
+Chart.register(...registerables);
 
-// ── Simple Bar Chart (no external lib) ──
 const BarChart = ({ data }) => {
   if (!data || data.length === 0) return null;
-
   const max = Math.max(...data.map((d) => d.value), 1);
-
   return (
     <div className="flex items-end gap-2 h-48 w-full">
       {data.map((d, i) => {
         const pct = (d.value / max) * 100;
         return (
           <div key={i} className="flex flex-col items-center flex-1 gap-1 group">
-            {/* Tooltip */}
             <div className="opacity-0 group-hover:opacity-100 transition text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg px-2 py-1 shadow whitespace-nowrap">
               {Number(d.value).toLocaleString("vi-VN")}₫
             </div>
-            {/* Bar */}
             <div className="w-full flex items-end" style={{ height: "160px" }}>
               <div
                 className={`w-full rounded-t-lg transition-all duration-500 ${d.color}`}
                 style={{ height: `${Math.max(pct, 2)}%` }}
               />
             </div>
-            {/* Label */}
             <span className="text-xs text-slate-400 font-medium whitespace-nowrap">{d.label}</span>
           </div>
         );
       })}
+    </div>
+  );
+};
+
+const SlotLineChart = ({ slotStatistics }) => {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const hourCounts = new Array(24).fill(0);
+    (slotStatistics || []).forEach((s) => {
+      const parts = s.timeRange.split(" - ");
+      if (parts.length !== 2) return;
+      const startH = parseInt(parts[0].split(":")[0], 10);
+      const endH   = parseInt(parts[1].split(":")[0], 10);
+      for (let h = startH; h < endH; h++) {
+        if (h >= 0 && h < 24) hourCounts[h] += s.count;
+      }
+    });
+    const labels = Array.from({ length: 24 }, (_, i) => `${i}h`);
+
+    if (chartRef.current) chartRef.current.destroy();
+    if (!canvasRef.current) return;
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Số đơn",
+          data: hourCounts,
+          borderColor: "#6366f1",
+          backgroundColor: "rgba(99,102,241,0.08)",
+          borderWidth: 2,
+          pointBackgroundColor: "#fff",
+          pointBorderColor: "#6366f1",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.4,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} đơn` } },
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(148,163,184,0.12)" },
+            ticks: {
+              color: "#94a3b8",
+              font: { size: 11 },
+              autoSkip: false,
+              maxRotation: 0,
+              callback: (_, i) => (i % 1 === 0 ? `${i}` : ""),
+            },
+          },
+          y: {
+            beginAtZero: true,
+            min: 0,
+            grid: { color: "rgba(148,163,184,0.12)" },
+            ticks: { color: "#94a3b8", font: { size: 11 }, stepSize: 1, precision: 0 },
+          },
+        },
+      },
+    });
+    return () => { chartRef.current?.destroy(); };
+  }, [slotStatistics]);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "200px" }}>
+      <canvas ref={canvasRef} role="img" aria-label="Số đơn theo 24 giờ trong ngày">
+        Biểu đồ số đơn theo khung giờ.
+      </canvas>
+    </div>
+  );
+};
+
+const CourtLineChart = ({ courtStatistics }) => {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    const labels = (courtStatistics || []).map((d) => d.name);
+    const counts = (courtStatistics || []).map((d) => d.count);
+
+    if (chartRef.current) chartRef.current.destroy();
+    if (!canvasRef.current) return;
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Số đơn",
+          data: counts,
+          borderColor: "#10b981",
+          backgroundColor: "rgba(16,185,129,0.08)",
+          borderWidth: 2,
+          pointBackgroundColor: "#fff",
+          pointBorderColor: "#10b981",
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.4,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} đơn` } },
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(148,163,184,0.12)" },
+            ticks: { color: "#94a3b8", font: { size: 11 }, maxRotation: 0 },
+          },
+          y: {
+            beginAtZero: true,
+            min: 0,
+            grid: { color: "rgba(148,163,184,0.12)" },
+            ticks: { color: "#94a3b8", font: { size: 11 }, stepSize: 1, precision: 0 },
+          },
+        },
+      },
+    });
+    return () => { chartRef.current?.destroy(); };
+  }, [courtStatistics]);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "200px" }}>
+      <canvas ref={canvasRef} role="img" aria-label="Số đơn theo từng sân">
+        Biểu đồ số đơn theo sân.
+      </canvas>
     </div>
   );
 };
@@ -58,93 +195,63 @@ const OwnerFinancePage = () => {
     }
   };
 
-  useEffect(() => {
-    loadRevenue(month, year);
-  }, []);
+  useEffect(() => { loadRevenue(month, year); }, []);
 
   const handleSearch = () => {
     if (!month || !year) return;
     loadRevenue(month, year);
   };
 
-  // ── Derived values ──
-  const completed = data?.completed   || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
-  const cancelled = data?.cancelled   || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
-  const expired   = data?.expired     || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
+  const completed = data?.completed || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
+  const cancelled = data?.cancelled || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
+  const expired   = data?.expired   || { total: 0, totalAmount: 0, revenueAfterCommission: 0 };
   const totalRevenue = (completed.revenueAfterCommission || 0) + (expired.revenueAfterCommission || 0);
 
   const cards = [
     {
-      label: "Đơn hoàn thành",
-      value: completed.total,
+      label: "Đơn hoàn thành", value: completed.total,
       sub: `${Number(completed.revenueAfterCommission).toLocaleString("vi-VN")}₫`,
       icon: <CheckCircle className="w-5 h-5" />,
-      bg: "bg-emerald-50",
-      border: "border-emerald-100",
-      iconBg: "bg-emerald-500",
-      text: "text-emerald-600",
-      subText: "text-emerald-500",
+      bg: "bg-emerald-50", border: "border-emerald-100",
+      iconBg: "bg-emerald-500", text: "text-emerald-600", subText: "text-emerald-500",
     },
     {
-      label: "Đơn đã huỷ",
-      value: cancelled.total,
+      label: "Đơn đã huỷ", value: cancelled.total,
       sub: `${Number(cancelled.totalAmount).toLocaleString("vi-VN")}₫`,
       icon: <XCircle className="w-5 h-5" />,
-      bg: "bg-red-50",
-      border: "border-red-100",
-      iconBg: "bg-red-500",
-      text: "text-red-600",
-      subText: "text-red-400",
+      bg: "bg-red-50", border: "border-red-100",
+      iconBg: "bg-red-500", text: "text-red-600", subText: "text-red-400",
     },
     {
-      label: "Đơn quá hạn",
-      value: expired.total,
+      label: "Đơn quá hạn", value: expired.total,
       sub: `${Number(expired.revenueAfterCommission).toLocaleString("vi-VN")}₫`,
       icon: <Clock className="w-5 h-5" />,
-      bg: "bg-amber-50",
-      border: "border-amber-100",
-      iconBg: "bg-amber-500",
-      text: "text-amber-600",
-      subText: "text-amber-500",
+      bg: "bg-amber-50", border: "border-amber-100",
+      iconBg: "bg-amber-500", text: "text-amber-600", subText: "text-amber-500",
     },
     {
       label: "Tổng doanh thu",
       value: `${Number(totalRevenue).toLocaleString("vi-VN")}₫`,
       sub: "Sau khi trừ hoa hồng",
       icon: <TrendingUp className="w-5 h-5" />,
-      bg: "bg-blue-50",
-      border: "border-blue-100",
-      iconBg: "bg-blue-500",
-      text: "text-blue-600",
-      subText: "text-blue-400",
+      bg: "bg-blue-50", border: "border-blue-100",
+      iconBg: "bg-blue-500", text: "text-blue-600", subText: "text-blue-400",
       bigValue: true,
     },
   ];
 
   const chartData = [
-    {
-      label: "Hoàn thành",
-      value: completed.revenueAfterCommission || 0,
-      color: "bg-emerald-400",
-    },
-    {
-      label: "Quá hạn",
-      value: expired.revenueAfterCommission || 0,
-      color: "bg-amber-400",
-    },
-    {
-      label: "Tổng cộng",
-      value: totalRevenue,
-      color: "bg-blue-500",
-    },
+    { label: "Hoàn thành", value: completed.revenueAfterCommission || 0, color: "bg-emerald-400" },
+    { label: "Quá hạn",    value: expired.revenueAfterCommission   || 0, color: "bg-amber-400"  },
+    { label: "Tổng cộng",  value: totalRevenue,                          color: "bg-blue-500"   },
   ];
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-  const years  = Array.from({ length: 6 }, (_, i) => now.getFullYear() - i);
+  const years  = Array.from({ length: 6  }, (_, i) => now.getFullYear() - i);
 
   return (
     <div className="p-6">
-      {/* ── FILTER BAR ── */}
+      {/* FILTER BAR */}
       <div className="flex items-center gap-3 mb-8 flex-wrap">
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tháng</p>
@@ -153,12 +260,9 @@ const OwnerFinancePage = () => {
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
           >
-            {months.map((m) => (
-              <option key={m} value={m}>Tháng {m}</option>
-            ))}
+            {months.map((m) => <option key={m} value={m}>Tháng {m}</option>)}
           </select>
         </div>
-
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Năm</p>
           <select
@@ -166,14 +270,11 @@ const OwnerFinancePage = () => {
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
           >
-            {years.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
+            {years.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
-
         <div className="flex items-end">
-          <div className="mb-0 mt-5">
+          <div className="mt-5">
             <button
               onClick={handleSearch}
               disabled={loading}
@@ -191,19 +292,17 @@ const OwnerFinancePage = () => {
             </button>
           </div>
         </div>
-
         {error && (
-          <p className="text-red-400 text-sm flex items-center gap-1 mt-5">⚠ {error}</p>
+          <p className="text-red-400 text-sm flex items-center gap-1 mt-5">
+            <XCircle className="w-4 h-4" /> {error}
+          </p>
         )}
       </div>
 
-      {/* ── STAT CARDS ── */}
+      {/* STAT CARDS */}
       <div className="grid grid-cols-2 gap-4 mb-8 xl:grid-cols-4">
         {cards.map((c, i) => (
-          <div
-            key={i}
-            className={`rounded-2xl border p-5 flex flex-col gap-3 ${c.bg} ${c.border}`}
-          >
+          <div key={i} className={`rounded-2xl border p-5 flex flex-col gap-3 ${c.bg} ${c.border}`}>
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{c.label}</p>
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white ${c.iconBg}`}>
@@ -220,20 +319,18 @@ const OwnerFinancePage = () => {
         ))}
       </div>
 
-      {/* ── CHART ── */}
-      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+      {/* BAR CHART */}
+      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-5">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-sm font-bold text-slate-800">Biểu đồ doanh thu</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Tháng {month}/{year} — Doanh thu sau hoa hồng
-            </p>
+            <p className="text-xs text-slate-400 mt-0.5">Tháng {month}/{year} — Doanh thu sau hoa hồng</p>
           </div>
           <div className="flex items-center gap-4">
             {[
               { color: "bg-emerald-400", label: "Hoàn thành" },
-              { color: "bg-amber-400",   label: "Quá hạn" },
-              { color: "bg-blue-500",    label: "Tổng cộng" },
+              { color: "bg-amber-400",   label: "Quá hạn"    },
+              { color: "bg-blue-500",    label: "Tổng cộng"  },
             ].map((l) => (
               <div key={l.label} className="flex items-center gap-1.5">
                 <div className={`w-2.5 h-2.5 rounded-sm ${l.color}`} />
@@ -242,14 +339,44 @@ const OwnerFinancePage = () => {
             ))}
           </div>
         </div>
-
         {loading ? (
-          <div className="h-48 flex items-center justify-center text-slate-400 text-sm">
-            Đang tải...
-          </div>
+          <div className="h-48 flex items-center justify-center text-slate-400 text-sm">Đang tải...</div>
         ) : (
           <BarChart data={chartData} />
         )}
+      </div>
+
+      {/* LINE CHARTS */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="w-2.5 h-2.5 rounded-sm bg-emerald-400" />
+              <h3 className="text-sm font-bold text-slate-800">Đơn theo sân</h3>
+            </div>
+            <p className="text-xs text-slate-400 ml-[18px]">Số lượng đơn theo từng sân — Tháng {month}/{year}</p>
+          </div>
+          {loading ? (
+            <div className="h-48 flex items-center justify-center text-slate-400 text-sm">Đang tải...</div>
+          ) : (
+            <CourtLineChart courtStatistics={data?.courtStatistics} />
+          )}
+        </div>
+
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-0.5">
+              <div className="w-2.5 h-2.5 rounded-sm bg-indigo-400" />
+              <h3 className="text-sm font-bold text-slate-800">Đơn theo khung giờ</h3>
+            </div>
+            <p className="text-xs text-slate-400 ml-[18px]">Số đơn theo từng giờ trong ngày — Tháng {month}/{year}</p>
+          </div>
+          {loading ? (
+            <div className="h-48 flex items-center justify-center text-slate-400 text-sm">Đang tải...</div>
+          ) : (
+            <SlotLineChart slotStatistics={data?.slotStatistics} />
+          )}
+        </div>
       </div>
     </div>
   );
