@@ -113,7 +113,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                      @Param("scheduleId") Long scheduleId);
 
 
-    // Tìm sân có nhiều lượt đặt nhất (chỉ tính COMPLETED)
+    // Lấy thống kê tất cả các sân của chủ sân (để vẽ biểu đồ)
     @Query(value = """
                 SELECT c.name, COUNT(b.id) as total 
                 FROM bookings b 
@@ -123,29 +123,31 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                   AND (:month IS NULL OR MONTH(b.booking_date_time) = :month)
                   AND b.status = 'COMPLETED'
                 GROUP BY c.id, c.name 
-                ORDER BY total DESC 
-                LIMIT 1
+                ORDER BY total DESC
             """, nativeQuery = true)
-    List<Object[]> findTopCourt(@Param("ownerId") Long ownerId,
-                                @Param("year") int year,
-                                @Param("month") Integer month);
+    List<Object[]> findAllCourtsStat(@Param("ownerId") Long ownerId,
+                                     @Param("year") int year,
+                                     @Param("month") Integer month);
 
-    // Tìm khung giờ có nhiều lượt đặt nhất
+    // Lấy thống kê tất cả khung giờ có người đặt (để vẽ biểu đồ)
     @Query(value = """
-                SELECT b.start_time, b.end_time, COUNT(b.id) as total 
-                FROM bookings b 
-                JOIN courts c ON b.court_id = c.id 
-                WHERE c.owner_id = :ownerId 
-                  AND YEAR(b.booking_date_time) = :year 
+                SELECT 
+                    TIME_FORMAT(s.start_time, '%H:%i') as st,
+                    TIME_FORMAT(s.end_time, '%H:%i') as et,
+                    COUNT(b.id) as total
+                FROM bookings b
+                JOIN courts c ON b.court_id = c.id
+                JOIN court_schedules s ON b.schedule_id = s.id
+                WHERE c.owner_id = :ownerId
+                  AND YEAR(b.booking_date_time) = :year
                   AND (:month IS NULL OR MONTH(b.booking_date_time) = :month)
                   AND b.status = 'COMPLETED'
-                GROUP BY b.start_time, b.end_time 
-                ORDER BY total DESC 
-                LIMIT 1
+                GROUP BY s.start_time, s.end_time
+                ORDER BY s.start_time ASC
             """, nativeQuery = true)
-    List<Object[]> findTopSlot(@Param("ownerId") Long ownerId,
-                               @Param("year") int year,
-                               @Param("month") Integer month);
-
-
+    List<Object[]> findAllSlotsStat(@Param("ownerId") Long ownerId,
+                                    @Param("year") int year,
+                                    @Param("month") Integer month);
 }
+
+

@@ -5,9 +5,7 @@ import com.example.sportsfacility_backend.dto.RevenueResponseDTO;
 import com.example.sportsfacility_backend.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,12 +18,12 @@ public class OwnerRevenueService {
     }
 
     public RevenueResponseDTO getRevenue(Long ownerId, int year, Integer month) {
-        // 1. Lấy dữ liệu tài chính
-        List<Object[]> result = bookingRepository.getOwnerRevenueSeparate(ownerId, year, month);
 
+        // 1. Dữ liệu tổng hợp doanh thu
+        List<Object[]> result = bookingRepository.getOwnerRevenueSeparate(ownerId, year, month);
         RevenueItemDTO completed, cancelled, expired;
 
-        if (result.isEmpty() || result.get(0)[0] == null && result.get(0)[3] == null) {
+        if (result.isEmpty() || result.get(0) == null || result.get(0)[0] == null) {
             completed = new RevenueItemDTO(0L, 0.0, 0.0);
             cancelled = new RevenueItemDTO(0L, 0.0, 0.0);
             expired = new RevenueItemDTO(0L, 0.0, 0.0);
@@ -33,48 +31,28 @@ public class OwnerRevenueService {
             Object[] r = result.get(0);
             completed = new RevenueItemDTO(toLong(r[0]), toDouble(r[1]), toDouble(r[2]));
             cancelled = new RevenueItemDTO(toLong(r[3]), toDouble(r[4]), toDouble(r[5]));
-            expired = new RevenueItemDTO(toLong(r[6]), toDouble(r[7]), toDouble(r[8]));
+            expired   = new RevenueItemDTO(toLong(r[6]), toDouble(r[7]), toDouble(r[8]));
         }
 
-        // 2. Lấy sân được đặt nhiều nhất
-        RevenueResponseDTO.TopItemDTO topCourt = null;
-        List<Object[]> courtRes = bookingRepository.findTopCourt(ownerId, year, month);
-        if (!courtRes.isEmpty()) {
-            topCourt = new RevenueResponseDTO.TopItemDTO(
-                    String.valueOf(courtRes.get(0)[0]),
-                    toLong(courtRes.get(0)[1])
-            );
+        // 2. Thống kê Sân (Duyệt toàn bộ list)
+        List<RevenueResponseDTO.TopItemDTO> courtStats = new ArrayList<>();
+        List<Object[]> courtRes = bookingRepository.findAllCourtsStat(ownerId, year, month);
+        for (Object[] row : courtRes) {
+            courtStats.add(new RevenueResponseDTO.TopItemDTO(
+                    String.valueOf(row[0]),
+                    toLong(row[1])
+            ));
         }
 
-        // 3. Lấy khung giờ được đặt nhiều nhất
-        RevenueResponseDTO.TopSlotDTO topSlot = null;
-        List<Object[]> slotRes = bookingRepository.findTopSlot(ownerId, year, month);
-
-        if (!slotRes.isEmpty()) {
-            Object[] row = slotRes.get(0);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            String startStr = "00:00";
-            String endStr = "00:00";
-
-            // Xử lý an toàn cho startTime (row[0])
-            if (row[0] instanceof Time sqlTime) {
-                startStr = sqlTime.toLocalTime().format(formatter);
-            } else if (row[0] instanceof LocalTime lt) {
-                startStr = lt.format(formatter);
-            }
-
-            // Xử lý an toàn cho endTime (row[1])
-            if (row[1] instanceof Time sqlTime) {
-                endStr = sqlTime.toLocalTime().format(formatter);
-            } else if (row[1] instanceof LocalTime lt) {
-                endStr = lt.format(formatter);
-            }
-
-            topSlot = new RevenueResponseDTO.TopSlotDTO(startStr + " - " + endStr, toLong(row[2]));
+        // 3. Thống kê Khung giờ (Duyệt toàn bộ list)
+        List<RevenueResponseDTO.TopSlotDTO> slotStats = new ArrayList<>();
+        List<Object[]> slotRes = bookingRepository.findAllSlotsStat(ownerId, year, month);
+        for (Object[] row : slotRes) {
+            String timeRange = row[0] + " - " + row[1];
+            slotStats.add(new RevenueResponseDTO.TopSlotDTO(timeRange, toLong(row[2])));
         }
 
-        return new RevenueResponseDTO(completed, cancelled, expired, topCourt, topSlot);
+        return new RevenueResponseDTO(completed, cancelled, expired, courtStats, slotStats);
     }
 
     private Double toDouble(Object o) {
