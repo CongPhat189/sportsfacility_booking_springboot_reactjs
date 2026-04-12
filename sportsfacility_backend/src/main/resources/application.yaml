@@ -55,3 +55,9 @@ vnpay:
   hash-secret: C3NBM8MWADUJ1HDMU1KZ67YICMAD9BSJ
   url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
   return-url: http://localhost:8080/payments/vnpay/callback
+
+gemini:
+  api:
+    key: AIzaSyBemCnDxXjYd99KCmpjbE2IGA7ZkhDXY-M
+    url: https://generativelanguage.googleapis.com/v1
+    model: gemini-2.5-flash

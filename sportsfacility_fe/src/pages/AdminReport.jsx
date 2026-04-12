@@ -5,8 +5,29 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer
 } from "recharts";
 import { toast } from "react-toastify";
+import ReactMarkdown from "react-markdown";
 
 const COLORS = ["#f59e0b", "#10b981", "#ef4444"];
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const StatCard = ({ label, value, sub, dotColor }) => (
+    <div style={{
+        background: "var(--color-background-secondary, #f5f5f5)",
+        borderRadius: 8,
+        padding: "14px 16px",
+    }}>
+        <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            <span style={{
+                display: "inline-block", width: 7, height: 7,
+                borderRadius: "50%", background: dotColor,
+                marginRight: 5, verticalAlign: "middle", position: "relative", top: -1
+            }} />
+            {label}
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 500, lineHeight: 1.2 }}>{value}</div>
+        <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>{sub}</div>
+    </div>
+);
 
 const AdminReport = () => {
     const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -14,6 +35,8 @@ const AdminReport = () => {
     const [bookingData, setBookingData] = useState([]);
     const [revenueData, setRevenueData] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [aiInsight, setAiInsight] = useState("");
+    const [aiLoading, setAiLoading] = useState(false);
 
     const loadReport = async () => {
         try {
@@ -22,17 +45,13 @@ const AdminReport = () => {
                 authAPIs().get(endpoints.adminBookingReport(month, year)),
                 authAPIs().get(endpoints.adminrevenueReport(month, year)),
             ]);
-
             const booking = bookingRes.data;
             setBookingData([
                 { name: "Pending", value: booking.pending },
                 { name: "Completed", value: booking.completed },
                 { name: "Cancelled", value: booking.cancelled },
             ]);
-
-            setRevenueData(
-                revenueRes.data.map((r) => ({ month: r.month, revenue: r.revenue }))
-            );
+            setRevenueData(revenueRes.data.map((r) => ({ month: r.month, revenue: r.revenue })));
         } catch (err) {
             console.error(err);
             toast.error("Lỗi load report");
@@ -49,183 +68,196 @@ const AdminReport = () => {
     const cancelled = bookingData.find((d) => d.name === "Cancelled")?.value || 0;
     const totalRevenue = revenueData.reduce((s, d) => s + (d.revenue || 0), 0);
 
-    const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const pct = (v) => totalBookings ? Math.round((v / totalBookings) * 100) : 0;
+
+    const analyzeWithAI = async () => {
+        try {
+            setAiLoading(true);
+            const res = await authAPIs().post("/admin/reports/analyze", {
+                pending, completed, cancelled, revenue: revenueData,
+            });
+            setAiInsight(res.data);
+        } catch (err) {
+            console.error(err);
+            toast.error("Lỗi AI");
+        } finally {
+            setAiLoading(false);
+        }
+    };
 
     const statCards = [
-        {
-            label: "Tổng booking",
-            value: totalBookings,
-            sub: `Tháng ${month}/${year}`,
-            color: "bg-violet-50 text-violet-700",
-            dot: "bg-violet-400",
-        },
-        {
-            label: "Chờ xử lý",
-            value: pending,
-            sub: `${totalBookings ? Math.round((pending / totalBookings) * 100) : 0}% tổng booking`,
-            color: "bg-amber-50 text-amber-700",
-            dot: "bg-amber-400",
-        },
-        {
-            label: "Hoàn thành",
-            value: completed,
-            sub: `${totalBookings ? Math.round((completed / totalBookings) * 100) : 0}% tổng booking`,
-            color: "bg-emerald-50 text-emerald-700",
-            dot: "bg-emerald-500",
-        },
-        {
-            label: "Đã huỷ",
-            value: cancelled,
-            sub: `${totalBookings ? Math.round((cancelled / totalBookings) * 100) : 0}% tổng booking`,
-            color: "bg-red-50 text-red-600",
-            dot: "bg-red-400",
-        },
-        {
-            label: "Doanh thu",
-            value: totalRevenue.toLocaleString("vi-VN") + " ₫",
-            sub: "Doanh thu tháng này của hệ thống",
-            color: "bg-blue-50 text-blue-700",
-            dot: "bg-blue-400",
-        },
+        { label: "Tổng booking", value: totalBookings, sub: `Tháng ${month}/${year}`, dotColor: "#7c3aed" },
+        { label: "Chờ xử lý", value: pending, sub: `${pct(pending)}% tổng booking`, dotColor: "#f59e0b" },
+        { label: "Hoàn thành", value: completed, sub: `${pct(completed)}% tổng booking`, dotColor: "#10b981" },
+        { label: "Đã huỷ", value: cancelled, sub: `${pct(cancelled)}% tổng booking`, dotColor: "#ef4444" },
+        { label: "Doanh thu", value: totalRevenue.toLocaleString("vi-VN") + " ₫", sub: "Doanh thu cao nhất trong 3 tháng", dotColor: "#3b82f6" },
     ];
 
+    /* ── custom doughnut label ── */
+    const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+        if (percent < 0.05) return null;
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+        return (
+            <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={500}>
+                {`${Math.round(percent * 100)}%`}
+            </text>
+        );
+    };
+
+    /* ── custom bar tooltip ── */
+    const RevenueTooltip = ({ active, payload, label }) => {
+        if (!active || !payload?.length) return null;
+        return (
+            <div style={{
+                background: "#fff", border: "0.5px solid #e5e7eb",
+                borderRadius: 8, padding: "8px 12px", fontSize: 13,
+            }}>
+                <div style={{ color: "#888", marginBottom: 2 }}>{label}</div>
+                <div style={{ fontWeight: 500, color: "#7c3aed" }}>
+                    {Number(payload[0].value).toLocaleString("vi-VN")} ₫
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+        <div style={{ padding: "1.5rem", fontFamily: "sans-serif" }}>
+
+            {/* ── Header ── */}
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.5rem", gap: "1rem", flexWrap: "wrap" }}>
                 <div>
-                    <h2 className="text-xl font-semibold text-gray-800">Báo cáo thống kê</h2>
-                    <p className="text-sm text-gray-500 mt-1">Tháng {month} / {year}</p>
+                    <h2 style={{ fontSize: 18, fontWeight: 500, margin: 0 }}>Báo cáo thống kê</h2>
+                    <p style={{ fontSize: 13, color: "#888", marginTop: 3 }}>Tháng {month} / {year}</p>
                 </div>
 
-                {/* Filter */}
-                <div className="flex items-center gap-2">
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <select
                         value={month}
                         onChange={(e) => setMonth(Number(e.target.value))}
-                        className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-violet-400 bg-white text-gray-700"
+                        style={{ fontSize: 13, padding: "6px 10px", height: 34, border: "0.5px solid #d1d5db", borderRadius: 8, background: "#fff" }}
                     >
                         {MONTH_NAMES.map((m, i) => (
                             <option key={i} value={i + 1}>{m}</option>
                         ))}
                     </select>
+
                     <input
                         type="number"
                         value={year}
                         onChange={(e) => setYear(Number(e.target.value))}
-                        className="w-24 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-violet-400 bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        placeholder="Năm"
+                        style={{ width: 80, fontSize: 13, padding: "6px 10px", height: 34, border: "0.5px solid #d1d5db", borderRadius: 8 }}
                     />
+
+                    <button
+                        onClick={analyzeWithAI}
+                        disabled={aiLoading}
+                        style={{
+                            display: "flex", alignItems: "center", gap: 6,
+                            fontSize: 13, fontWeight: 500, padding: "6px 14px", height: 34,
+                            borderRadius: 8, background: "#7c3aed", color: "#fff",
+                            border: "none", cursor: aiLoading ? "not-allowed" : "pointer",
+                            opacity: aiLoading ? 0.7 : 1,
+                        }}
+                    >
+                        ✦ Phân tích AI
+                    </button>
                 </div>
             </div>
 
             {loading ? (
-                <div className="py-16 text-center text-sm text-gray-400">Đang tải dữ liệu...</div>
+                <div style={{ textAlign: "center", padding: "3rem", color: "#888" }}>Đang tải...</div>
             ) : (
                 <>
-                    {/* Stats bar */}
-                    <div className="grid grid-cols-5 gap-3 mb-6">
-                        {statCards.map((s, i) => (
-                            <div key={i} className="border border-gray-200 rounded-xl p-4 bg-white">
-                                <div className="flex items-center gap-1.5 mb-2">
-                                    <span className={`w-2 h-2 rounded-full ${s.dot}`} />
-                                    <span className="text-xs text-gray-500">{s.label}</span>
-                                </div>
-                                <p className="text-lg font-semibold text-gray-800 leading-tight">{s.value}</p>
-                                <p className="text-xs text-gray-400 mt-1">{s.sub}</p>
-                            </div>
-                        ))}
+                    {/* ── Stat cards ── */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 10, marginBottom: "1.5rem" }}>
+                        {statCards.map((s, i) => <StatCard key={i} {...s} />)}
                     </div>
 
-                    {/* Charts */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* ── Charts ── */}
+                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,2fr)", gap: 12, marginBottom: "1.5rem" }}>
 
-                        {/* Pie Chart */}
-                        <div className="border border-gray-200 rounded-xl p-5">
-                            <div className="mb-4">
-                                <h3 className="text-sm font-semibold text-gray-700">Trạng thái booking</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">Tổng {totalBookings} booking</p>
-                            </div>
+                        {/* Doughnut */}
+                        <div style={{ background: "#fff", border: "0.5px solid #e5e7eb", borderRadius: 12, padding: 16 }}>
+                            <h3 style={{ fontSize: 13, fontWeight: 500, color: "#888", marginBottom: 12 }}>Trạng thái booking</h3>
+                            <PieChart width={220} height={180}>
+                                <Pie
+                                    data={bookingData}
+                                    dataKey="value"
+                                    cx="50%" cy="50%"
+                                    innerRadius={52} outerRadius={80}
+                                    labelLine={false}
+                                    label={renderCustomLabel}
+                                >
+                                    {bookingData.map((_, i) => <Cell key={i} fill={COLORS[i]} stroke="none" />)}
+                                </Pie>
+                                <Tooltip formatter={(v, name) => [v, name === "Pending" ? "Chờ xử lý" : name === "Completed" ? "Hoàn thành" : "Đã huỷ"]} />
+                            </PieChart>
 
-                            <div className="flex justify-center gap-4 mb-3">
-                                {bookingData.map((entry, i) => (
-                                    <div key={i} className="flex items-center gap-1.5">
-                                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: COLORS[i] }} />
-                                        <span className="text-xs text-gray-500">{entry.name}</span>
-                                        <span className="text-xs font-medium text-gray-700">{entry.value}</span>
+                            {/* Legend */}
+                            <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 8 }}>
+                                {[
+                                    { label: "Chờ xử lý", value: pending, color: "#f59e0b" },
+                                    { label: "Hoàn thành", value: completed, color: "#10b981" },
+                                    { label: "Đã huỷ", value: cancelled, color: "#ef4444" },
+                                ].map((l, i) => (
+                                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12 }}>
+                                        <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#666" }}>
+                                            <span style={{ width: 8, height: 8, borderRadius: 2, background: l.color, display: "inline-block" }} />
+                                            {l.label}
+                                        </span>
+                                        <span style={{ fontWeight: 500 }}>{l.value}</span>
                                     </div>
                                 ))}
                             </div>
-
-                            <div className="flex justify-center">
-                                <PieChart width={260} height={260}>
-                                    <Pie
-                                        data={bookingData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={100}
-                                        paddingAngle={3}
-                                        dataKey="value"
-                                    >
-                                        {bookingData.map((_, index) => (
-                                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{
-                                            fontSize: "12px",
-                                            borderRadius: "8px",
-                                            border: "1px solid #e5e7eb",
-                                            boxShadow: "none",
-                                        }}
-                                    />
-                                </PieChart>
-                            </div>
                         </div>
 
-                        {/* Bar Chart */}
-                        <div className="border border-gray-200 rounded-xl p-5">
-                            <div className="mb-4">
-                                <h3 className="text-sm font-semibold text-gray-700">Doanh thu</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">3 tháng gần nhất</p>
-                            </div>
-
-                            <ResponsiveContainer width="100%" height={260}>
-                                <BarChart data={revenueData} barSize={32}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                                    <XAxis
-                                        dataKey="month"
-                                        tick={{ fontSize: 11, fill: "#9ca3af" }}
-                                        axisLine={false}
-                                        tickLine={false}
-                                    />
+                        {/* Bar chart */}
+                        <div style={{ background: "#fff", border: "0.5px solid #e5e7eb", borderRadius: 12, padding: 16 }}>
+                            <h3 style={{ fontSize: 13, fontWeight: 500, color: "#888", marginBottom: 12 }}>Doanh thu theo tháng</h3>
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={revenueData} barSize={28}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#888" }} />
                                     <YAxis
-                                        tick={{ fontSize: 11, fill: "#9ca3af" }}
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tickFormatter={(v) =>
-                                            v >= 1000000
-                                                ? `${(v / 1000000).toFixed(1)}M`
-                                                : v >= 1000
-                                                    ? `${(v / 1000).toFixed(0)}K`
-                                                    : v
-                                        }
+                                        axisLine={false} tickLine={false}
+                                        tick={{ fontSize: 11, fill: "#888" }}
+                                        tickFormatter={(v) => v >= 1000000 ? Math.round(v / 1000000) + "M" : v}
                                     />
-                                    <Tooltip
-                                        contentStyle={{
-                                            fontSize: "12px",
-                                            borderRadius: "8px",
-                                            border: "1px solid #e5e7eb",
-                                            boxShadow: "none",
-                                        }}
-                                        formatter={(v) => [v.toLocaleString("vi-VN") + " ₫", "Doanh thu"]}
-                                    />
-                                    <Bar dataKey="revenue" fill="#7c3aed" radius={[6, 6, 0, 0]} />
+                                    <Tooltip content={<RevenueTooltip />} />
+                                    <Bar dataKey="revenue" fill="#7c3aed" fillOpacity={0.15} stroke="#7c3aed" strokeWidth={1.5} radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
+                    </div>
 
+                    {/* ── AI Panel ── */}
+                    <div style={{ background: "#fff", border: "0.5px solid #e5e7eb", borderRadius: 12, padding: 18 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                            <span style={{
+                                display: "flex", alignItems: "center", gap: 6,
+                                background: "#f3f0ff", color: "#7c3aed",
+                                fontSize: 12, fontWeight: 500,
+                                padding: "3px 10px", borderRadius: 99,
+                            }}>
+                                ✦ Phân tích AI
+                            </span>
+                            <span style={{ fontSize: 13, color: "#aaa" }}>Nhận xét từ dữ liệu hiện tại</span>
+                        </div>
+
+                        {aiLoading ? (
+                            <p style={{ color: "#aaa", fontSize: 14 }}>AI đang phân tích...</p>
+                        ) : aiInsight ? (
+                            <div style={{ fontSize: 14, lineHeight: 1.7 }}>
+                                <ReactMarkdown>{aiInsight}</ReactMarkdown>
+                            </div>
+                        ) : (
+                            <p style={{ color: "#aaa", fontSize: 14, textAlign: "center", padding: "1.5rem 0" }}>
+                                Nhấn "Phân tích AI" để xem insight từ dữ liệu
+                            </p>
+                        )}
                     </div>
                 </>
             )}
