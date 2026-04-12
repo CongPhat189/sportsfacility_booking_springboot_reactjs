@@ -16,8 +16,10 @@ import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -42,6 +44,8 @@ public class PaymentService {
 
     @Autowired
     private BookingRepository bookingRepository;
+    @Autowired
+    private EmailService emailService;
 
     @Transactional
     public String createPaymentUrl(Long bookingId, String ipAddress) {
@@ -120,6 +124,24 @@ public class PaymentService {
             Booking booking = payment.getBooking();
             booking.setStatus(BookingStatus.CONFIRMED);
             bookingRepository.save(booking);
+            // Gửi mail
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+            String formattedTime = booking.getBookingDateTime().format(timeFormatter);
+
+            NumberFormat currency = NumberFormat.getInstance(new Locale("vi", "VN"));
+            String formattedMoney = currency.format(booking.getTotalAmount());
+
+            try {
+                emailService.sendBookingSuccessEmail(
+                        booking.getCustomer().getEmail(),
+                        booking.getCustomer().getFullName(),
+                        booking.getCourt().getName(),
+                        formattedTime,
+                        formattedMoney
+                );
+            } catch (Exception e) {
+                System.out.println("Send mail failed: " + e.getMessage());
+            }
         } else {
             payment.setStatus(PaymentStatus.FAILED);
         }
