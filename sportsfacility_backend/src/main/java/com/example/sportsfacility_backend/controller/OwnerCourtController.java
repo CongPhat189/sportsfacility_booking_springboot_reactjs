@@ -11,6 +11,7 @@
     import org.springframework.web.multipart.MultipartFile;
 
     import java.io.IOException;
+    import java.util.ArrayList;
     import java.util.List;
 
     @RestController
@@ -23,18 +24,32 @@
         @Autowired
         private CloudinaryService cloudinaryService;
 
-        // ================= CREATE COURT =================
+        // ================= CREATE COURT (Sửa lại để nhận 3 ảnh) =================
         @PostMapping(consumes = "multipart/form-data")
         public ResponseEntity<CourtResponse> createCourt(
-                @RequestPart("court") CourtRequest request,
-                @RequestPart(value = "file", required = false) MultipartFile file,
+                @ModelAttribute CourtRequest request, // Dùng ModelAttribute để nhận List<MultipartFile> bên trong DTO
                 Authentication authentication) throws IOException {
 
             String email = authentication.getName();
 
-            if (file != null && !file.isEmpty()) {
-                String imageUrl = cloudinaryService.uploadImage(file);
-                request.setImageUrl(imageUrl);
+            // Xử lý upload danh sách file ảnh
+            if (request.getImageFiles() != null && !request.getImageFiles().isEmpty()) {
+                List<String> uploadedUrls = new ArrayList<>();
+
+                // Chỉ lấy tối đa 3 ảnh
+                int limit = Math.min(request.getImageFiles().size(), 3);
+                for (int i = 0; i < limit; i++) {
+                    MultipartFile file = request.getImageFiles().get(i);
+                    if (file != null && !file.isEmpty()) {
+                        String url = cloudinaryService.uploadImage(file);
+                        uploadedUrls.add(url);
+                    }
+                }
+
+                // Nối các link thành "link1,link2,link3" và gán vào imageUrl của request
+                if (!uploadedUrls.isEmpty()) {
+                    request.setImageUrl(String.join(",", uploadedUrls));
+                }
             }
 
             return ResponseEntity.ok(courtService.createCourt(request, email));
@@ -57,12 +72,18 @@
         @PutMapping(value = "/{id}", consumes = "multipart/form-data")
         public ResponseEntity<CourtResponse> updateCourt(
                 @PathVariable Long id,
-                @RequestPart("court") CourtRequest request,
-                @RequestPart(value = "file", required = false) MultipartFile file) throws IOException {
+                @ModelAttribute CourtRequest request) throws IOException {
 
-            if (file != null && !file.isEmpty()) {
-                String imageUrl = cloudinaryService.uploadImage(file);
-                request.setImageUrl(imageUrl);
+            if (request.getImageFiles() != null && !request.getImageFiles().isEmpty()) {
+                List<String> uploadedUrls = new ArrayList<>();
+                int limit = Math.min(request.getImageFiles().size(), 3);
+                for (int i = 0; i < limit; i++) {
+                    MultipartFile file = request.getImageFiles().get(i);
+                    if (file != null && !file.isEmpty()) {
+                        uploadedUrls.add(cloudinaryService.uploadImage(file));
+                    }
+                }
+                request.setImageUrl(String.join(",", uploadedUrls));
             }
 
             return ResponseEntity.ok(courtService.updateCourt(id, request));

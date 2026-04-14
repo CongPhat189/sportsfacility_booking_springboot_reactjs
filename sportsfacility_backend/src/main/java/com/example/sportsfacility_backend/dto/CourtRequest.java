@@ -1,5 +1,9 @@
 package com.example.sportsfacility_backend.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
 public class CourtRequest {
 
     private Integer categoryId;
@@ -7,6 +11,12 @@ public class CourtRequest {
     private String address;
     private String description;
     private String imageUrl;
+
+    // Thêm trường này để nhận danh sách file thực tế từ Frontend
+    private List<MultipartFile> imageFiles;
+
+    public List<MultipartFile> getImageFiles() { return imageFiles; }
+    public void setImageFiles(List<MultipartFile> imageFiles) { this.imageFiles = imageFiles; }
 
     public Integer getCategoryId() { return categoryId; }
     public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }

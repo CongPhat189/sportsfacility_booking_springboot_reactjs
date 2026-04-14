@@ -82,7 +82,7 @@ export default function CourtSearchPage() {
             <select value={city} onChange={e => setCity(e.target.value)}
               className="appearance-none border border-gray-200 rounded-xl pl-4 pr-9 py-3.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 bg-white cursor-pointer">
               <option value="">Tất cả thành phố</option>
-              <option value="TP.HCM">TP. Hồ Chí Minh</option>
+              <option value="Hồ Chí Minh" >TP. Hồ Chí Minh</option>
               <option value="Hà Nội">Hà Nội</option>
               <option value="Đà Nẵng">Đà Nẵng</option>
               <option value="Cần Thơ">Cần Thơ</option>
