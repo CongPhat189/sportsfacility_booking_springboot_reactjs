@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios, { endpoints } from '../config/APIs'
-import { Search, CircleDot, Feather, Disc3, Target, LayoutGrid, MapPin } from 'lucide-react'
+import { Map, Search, CircleDot, Feather, Disc3, Target, LayoutGrid, MapPin } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -9,13 +9,14 @@ import Footer from '../components/Footer'
 export default function HomePage() {
   const [keyword, setKeyword] = useState('')
   const [categories, setCategories] = useState([])
-  const [featuredCourts, setFeaturedCourts] = useState([])
   const [city, setCity] = useState('')
   const navigate = useNavigate()
+  const [topRatedCourts, setTopRatedCourts] = useState([])
+
 
   useEffect(() => {
     axios.get(endpoints['categories']).then(res => setCategories(res.data)).catch(() => {})
-    axios.get(endpoints['courts-search']).then(res => setFeaturedCourts(res.data.slice(0, 3))).catch(() => {})
+    axios.get('/courts/top-rated?limit=3').then(res => setTopRatedCourts(res.data)).catch(() => {})
   }, [])
 
   const categoryIconMap = {
@@ -99,20 +100,21 @@ return (
         </div>
       </div>
     </section>
-    <section className="bg-white py-12 px-8">
+    {topRatedCourts.length > 0 && (
+    <section className="bg-gray-50 py-12 px-8">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <p className="text-green-600 text-sm font-bold uppercase tracking-widest mb-1">Dành cho bạn</p>
-            <h2 className="text-2xl font-black text-gray-900">Sân thể thao nổi bật</h2>
+            <p className="text-orange-500 text-sm font-bold uppercase tracking-widest mb-1">Được đánh giá cao nhất</p>
+            <h2 className="text-2xl font-black text-gray-900">🔥 Sân Hot</h2>
           </div>
-          <button onClick={() => navigate('/courts')}
-            className="text-green-600 font-semibold text-sm hover:underline flex items-center gap-1">
+          <button onClick={() => navigate('/courts?sortBy=rating')}
+            className="text-orange-500 font-semibold text-sm hover:underline flex items-center gap-1">
             Xem tất cả →
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredCourts.map(court => (
+          {topRatedCourts.map(court => (
             <div key={court.id} onClick={() => navigate(`/courts/${court.id}`)}
               className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
               <div className="relative">
@@ -121,14 +123,36 @@ return (
                 <span className="absolute top-3 left-3 bg-white text-gray-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                   {court.categoryName}
                 </span>
+                {court.averageRating && (
+                  <span className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    ⭐ {court.averageRating}
+                  </span>
+                )}
               </div>
               <div className="p-4">
                 <h3 className="font-bold text-gray-900 text-base mb-1">{court.name}</h3>
-                <p className="text-gray-500 text-sm flex items-center gap-1 mb-4 truncate">
-                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />{court.address}
+                <p className="text-gray-500 text-sm flex items-center gap-1 mb-1">
+                  <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+                  <span className="truncate">{court.address}</span>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    className="ml-1 text-green-600 hover:text-green-800 flex-shrink-0"
+                    title="Xem trên Google Maps"
+                  >
+                    <Map className="w-3.5 h-3.5" />
+                  </a>
                 </p>
+                {court.averageRating && (
+                  <p className="text-yellow-500 text-sm font-semibold mb-3">
+                    ⭐ {court.averageRating}
+                    <span className="text-gray-400 font-normal ml-1">({court.reviewCount} đánh giá)</span>
+                  </p>
+                )}
                 <button onClick={e => { e.stopPropagation(); navigate(`/courts/${court.id}`) }}
-                  className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold text-sm hover:bg-green-600 hover:text-white transition-colors">
+                  className="w-full bg-gray-100 text-gray-700 py-2.5 rounded-xl font-semibold text-sm hover:bg-orange-500 hover:text-white transition-colors">
                   Đặt sân ngay
                 </button>
               </div>
@@ -137,8 +161,7 @@ return (
         </div>
       </div>
     </section>
-
-
+  )}
     <Footer />
   </div>
 )

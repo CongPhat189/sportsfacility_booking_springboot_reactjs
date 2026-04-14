@@ -3,6 +3,7 @@ package com.example.sportsfacility_backend.repository;
 import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.entity.enums.CourtStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +21,16 @@ public interface CourtRepository extends JpaRepository<Court, Long> {
        """)
     List<Court> findByOwnerId(@Param("ownerId") Long ownerId);
 
+    @Query("SELECT c FROM Court c WHERE c.category.id = :categoryId")
+    List<Court> findByCategoryId(@Param("categoryId") Integer categoryId);
+
+
+    boolean existsByCategoryId(Integer categoryId);
+
+
+    @Modifying
+    @Query("DELETE FROM Court c WHERE c.owner.id = :ownerId")
+    void deleteByOwnerId(@Param("ownerId") Long ownerId);
 
 
     @Query("""

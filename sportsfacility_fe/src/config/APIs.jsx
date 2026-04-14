@@ -24,13 +24,13 @@ export const endpoints = {
     'cancel-booking': (id) => `/bookings/${id}/cancel`,
 
     // VNPay
-    'vnpay-create':     '/payments/vnpay/create',
+    'vnpay-create': '/payments/vnpay/create',
 
     // Reviews
-    'create-review':  '/reviews',
+    'create-review': '/reviews',
     'booking-review': (id) => `/bookings/${id}/review`,
 
-    'court-detail':  (id) => `courts/${id}`,
+    'court-detail': (id) => `courts/${id}`,
     'court-reviews': (id) => `courts/${id}/reviews`,
 
 
@@ -88,6 +88,7 @@ export const endpoints = {
 
     adminBookingReport: (month, year) => `/admin/reports/booking-pie?month=${month}&year=${year}`,
     adminrevenueReport: (month, year) => `/admin/reports/revenue-3months?month=${month}&year=${year}`,
+
 
 
 }

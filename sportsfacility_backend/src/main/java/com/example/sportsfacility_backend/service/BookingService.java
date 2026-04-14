@@ -103,23 +103,7 @@ public class BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        // Gửi mail
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
-        String formattedTime = savedBooking.getBookingDateTime().format(timeFormatter);
-        NumberFormat currency = NumberFormat.getInstance(new Locale("vi", "VN"));
-        String formattedMoney = currency.format(savedBooking.getTotalAmount());
 
-        try {
-            emailService.sendBookingSuccessEmail(
-                    savedBooking.getCustomer().getEmail(),
-                    savedBooking.getCustomer().getFullName(),
-                    savedBooking.getCourt().getName(),
-                    formattedTime,
-                    formattedMoney
-            );
-        } catch (Exception e) {
-            System.out.println("Send mail failed: " + e.getMessage());
-        }
 
         return new BookingResponseDTO(savedBooking);
     }

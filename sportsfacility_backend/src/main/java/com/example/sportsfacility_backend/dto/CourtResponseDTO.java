@@ -20,6 +20,8 @@ public class CourtResponseDTO {
     private BigDecimal commissionRate;
     private CourtStatus status;
     private String rejectReason;
+    private Double averageRating;
+    private Long reviewCount;
     private LocalDateTime createdAt;
 
     public CourtResponseDTO(Court court) {
@@ -38,12 +40,22 @@ public class CourtResponseDTO {
         this.createdAt = court.getCreatedAt();
     }
 
+    public CourtResponseDTO(Court court, Double averageRating, Long reviewCount) {
+        this(court);
+        this.averageRating = averageRating != null
+            ? Math.round(averageRating * 10.0) / 10.0
+            : null;
+        this.reviewCount = reviewCount != null ? reviewCount : 0L;
+    }
+
     public Long getId() {
         return id;
     }
 
     public Long getOwnerId() { return ownerId; }
     public String getOwnerName() { return ownerName; }
+    public Double getAverageRating() { return averageRating; }
+    public Long getReviewCount() { return reviewCount; }
     public Integer getCategoryId() { return categoryId; }
     public String getCategoryName() { return categoryName; }
     public String getName() { return name; }

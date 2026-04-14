@@ -59,7 +59,7 @@ public class EmailService {
 
         Context context = new Context();
         context.setVariable("courtName", courtName);
-        context.setVariable("link", "http://localhost:3000/courts");
+        context.setVariable("link", "http://localhost:5173/owner/courts");
         context.setVariable("fullName", fullName);
 
         String html = templateEngine.process("email/approve-court", context);

@@ -1,8 +1,12 @@
 package com.example.sportsfacility_backend.service;
 
 import com.example.sportsfacility_backend.dto.CourtCategoryRequestDTO;
+import com.example.sportsfacility_backend.entity.Court;
 import com.example.sportsfacility_backend.entity.CourtCategory;
+import com.example.sportsfacility_backend.entity.enums.CourtStatus;
 import com.example.sportsfacility_backend.repository.CourtCategoryRepository;
+import com.example.sportsfacility_backend.repository.CourtRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +17,8 @@ public class CourtCategoryService {
 
     @Autowired
     private CourtCategoryRepository courtCategoryRepository;
+    @Autowired
+    private CourtRepository courtRepository;
 
     // CREATE
     public CourtCategory createCategory(CourtCategoryRequestDTO req) {
@@ -52,29 +58,49 @@ public class CourtCategoryService {
     }
 
     // DISABLE
+    @Transactional
     public CourtCategory disableCategory(Integer id) {
 
         CourtCategory category = courtCategoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 
         category.setIsActive(false);
+        List<Court> courts = courtRepository.findByCategoryId(id);
+        for (Court c : courts) {
+            c.setStatus(CourtStatus.INACTIVE);
+        }
 
-        return courtCategoryRepository.save(category);
+        return category;
     }
 
     // ENABLE
+    @Transactional
     public CourtCategory enableCategory(Integer id) {
 
         CourtCategory category = courtCategoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 
         category.setIsActive(true);
+        List<Court> courts = courtRepository.findByCategoryId(id);
+        for (Court c : courts) {
+            c.setStatus(CourtStatus.ACTIVE);
+        }
 
-        return courtCategoryRepository.save(category);
+        return category;
     }
 
     //Delete
-    public void deleteCategory( Integer id ){
-        courtCategoryRepository.deleteById(id);
+    public void deleteCategory(Integer id) {
+
+        CourtCategory category = courtCategoryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+
+        boolean hasCourt = courtRepository.existsByCategoryId(id);
+
+        if (hasCourt) {
+            throw new RuntimeException("Không thể xóa vì còn sân thuộc danh mục này");
+        }
+
+        courtCategoryRepository.delete(category);
     }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Search, ChevronRight, ChevronLeft, Navigation, MapPin } from 'lucide-react'
+import { Search, ChevronRight, ChevronLeft, Navigation, MapPin, Map } from 'lucide-react'
 import axios, { endpoints } from '../config/APIs'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -18,6 +18,7 @@ export default function CourtSearchPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [city, setCity] = useState('')
+  const [sortBy, setSortBy] = useState('')
 
   const totalPages = Math.ceil(courts.length / PAGE_SIZE)
   const paginatedCourts = courts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
@@ -29,7 +30,11 @@ export default function CourtSearchPage() {
     try {
       const combinedKeyword = [keyword, city].filter(Boolean).join(' ') || undefined
       const res = await axios.get(endpoints['courts-search'], {
-        params: { keyword: combinedKeyword, categoryId: (overrideCategoryId !== undefined ? overrideCategoryId : categoryId) || undefined }
+        params: {
+          keyword: combinedKeyword,
+          categoryId: (overrideCategoryId !== undefined ? overrideCategoryId : categoryId) || undefined,
+          sortBy: sortBy || undefined
+        }
       })
       setCourts(res.data)
     } catch {
@@ -62,6 +67,10 @@ export default function CourtSearchPage() {
     return () => clearTimeout(timer)
   }, [keyword])
 
+  useEffect(() => {
+    handleSearch()
+  }, [sortBy])
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar /> 
@@ -82,7 +91,7 @@ export default function CourtSearchPage() {
             <select value={city} onChange={e => setCity(e.target.value)}
               className="appearance-none border border-gray-200 rounded-xl pl-4 pr-9 py-3.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 bg-white cursor-pointer">
               <option value="">Tất cả thành phố</option>
-              <option value="TP.HCM">TP. Hồ Chí Minh</option>
+              <option value="Hồ Chí Minh" >TP. Hồ Chí Minh</option>
               <option value="Hà Nội">Hà Nội</option>
               <option value="Đà Nẵng">Đà Nẵng</option>
               <option value="Cần Thơ">Cần Thơ</option>
@@ -117,6 +126,24 @@ export default function CourtSearchPage() {
             >
               Tất cả
             </button>
+            <span className="text-sm text-gray-500 font-medium">Sắp xếp:</span>
+            <button
+              onClick={() => { setSortBy('')}}
+              className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
+                sortBy === '' ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 text-gray-700 hover:border-gray-400'
+              }`}
+            >
+              Mặc định
+            </button>
+            <button
+              onClick={() => { setSortBy('rating')}}
+              className={`px-4 py-2 rounded-full text-sm font-medium border transition ${
+                sortBy === 'rating' ? 'bg-orange-500 text-white border-orange-500' : 'border-gray-300 text-gray-700 hover:border-orange-400'
+              }`}
+            >
+              🔥 Sân hot
+            </button>
+            <span className="w-px h-5 bg-gray-300 mx-1"></span>
             {categories.map(c => (
               <button key={c.id}
                 onClick={() => { setCategoryId(String(c.id)); handleSearch(null, c.id) }}
@@ -155,9 +182,27 @@ export default function CourtSearchPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="font-bold text-gray-800 text-lg mb-1">{court.name}</h3>
-                      <p className="text-gray-500 text-sm flex items-center gap-1 mb-4">
-                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />{court.address}
-                      </p>
+                      <div className="mb-4">
+                          <p className="text-gray-500 text-sm flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{court.address}</span>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              className="ml-1 text-green-600 hover:text-green-800 flex-shrink-0"
+                              title="Xem trên Google Maps"
+                            >
+                              <Map className="w-3.5 h-3.5" />
+                            </a>
+                          </p>
+                          {court.averageRating && (
+                            <p className="text-yellow-500 text-sm font-semibold mt-1">
+                              ⭐ {court.averageRating} <span className="text-gray-400 font-normal">({court.reviewCount} đánh giá)</span>
+                            </p>
+                          )}
+                        </div>
                       <button
                         onClick={e => { e.stopPropagation(); navigate(`/courts/${court.id}`) }}
                         className="w-full bg-green-500 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-green-600 flex items-center justify-center gap-1"
