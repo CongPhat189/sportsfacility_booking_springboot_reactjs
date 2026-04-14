@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAuth } from '../context/AuthProvider'
 
-import { MapPin, ChevronLeft, ChevronRight, Wifi, Car, Droplets, Bath, CircleDot, Shirt, Heart } from 'lucide-react'
+import { Map, MapPin, ChevronLeft, ChevronRight, Wifi, Car, Droplets, Bath, CircleDot, Shirt, Heart } from 'lucide-react'
 
 export default function CourtDetailPage() {
   const { id } = useParams()
@@ -156,6 +156,15 @@ export default function CourtDetailPage() {
               <h1 className="text-3xl font-black">{court.name}</h1>
               <p className="flex items-center gap-1 text-sm mt-1 opacity-90">
                 <MapPin className="w-3.5 h-3.5" /> {court.address}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 flex items-center gap-1 underline hover:text-green-300"
+                  title="Xem trên Google Maps"
+                >
+                  <Map className="w-3.5 h-3.5" /> Xem bản đồ
+                </a>
               </p>
             </div>
             {avgRating && (

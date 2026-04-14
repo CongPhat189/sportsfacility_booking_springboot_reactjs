@@ -38,9 +38,18 @@ public class CourtController {
     @GetMapping("/search")
     public ResponseEntity<List<CourtResponseDTO>> search(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer categoryId) {
-        return ResponseEntity.ok(courtService.searchCourts(keyword, categoryId));
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String sortBy) {
+        return ResponseEntity.ok(courtService.searchCourts(keyword, categoryId, sortBy));
     }
+
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<CourtResponseDTO>> getTopRated(
+            @RequestParam(defaultValue = "3") int limit) {
+        return ResponseEntity.ok(courtService.getTopRatedCourts(limit));
+    }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<CourtResponseDTO> getCourtById(@PathVariable Long id) {
