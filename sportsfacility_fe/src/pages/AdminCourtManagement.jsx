@@ -88,7 +88,7 @@ const AdminCourtManagement = () => {
 
     const getImageUrl = (url) => {
         if (!url) return null;
-        return url.startsWith("http") ? url : `http://localhost:8080/${url}`;
+        return url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || 'http://localhost:8080/'}${url}`;
     };
 
     return (
