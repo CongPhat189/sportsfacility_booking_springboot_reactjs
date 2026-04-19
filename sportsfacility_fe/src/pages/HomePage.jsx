@@ -118,7 +118,7 @@ return (
             <div key={court.id} onClick={() => navigate(`/courts/${court.id}`)}
               className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
               <div className="relative">
-                <img src={court.imageUrl || 'https://placehold.co/400x240?text=No+Image'}
+                <img src={court.imageUrl ? court.imageUrl.split(",")[0].trim() : 'https://placehold.co/400x240?text=No+Image'}
                   alt={court.name} className="w-full h-48 object-cover" />
                 <span className="absolute top-3 left-3 bg-white text-gray-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                   {court.categoryName}

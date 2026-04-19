@@ -172,7 +172,7 @@ export default function CourtSearchPage() {
                   >
                     <div className="relative overflow-hidden">
                       <img
-                        src={court.imageUrl || 'https://placehold.co/400x200?text=No+Image'}
+                        src={court.imageUrl ? court.imageUrl.split(",")[0].trim() : 'https://placehold.co/400x200?text=No+Image'}
                         alt={court.name}
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
