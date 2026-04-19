@@ -48,7 +48,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Xác thực tài khoản trên hệ thống SportArena");
             helper.setText(content, true);
-            helper.setFrom("tpn18092004@gmail.com");
+            helper.setFrom("trungtiendoan22@gmail.com");
 
             mailSender.send(message);
         } catch (Exception e) {
