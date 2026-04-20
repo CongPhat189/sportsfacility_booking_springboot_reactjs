@@ -10,6 +10,7 @@ export const endpoints = {
     'current-user': '/user/profile',
     'update-profile': 'user/profile',
     'change-password': 'user/change-password',
+    'social-login': '/auth/social-login',
 
 
 
