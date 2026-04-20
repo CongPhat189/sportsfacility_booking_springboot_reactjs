@@ -3,6 +3,7 @@ package com.example.sportsfacility_backend.controller;
 import com.example.sportsfacility_backend.dto.LoginRequest;
 import com.example.sportsfacility_backend.dto.LoginResponse;
 import com.example.sportsfacility_backend.dto.RegisterRequest;
+import com.example.sportsfacility_backend.dto.SocialLoginRequest;
 import com.example.sportsfacility_backend.entity.User;
 import com.example.sportsfacility_backend.entity.enums.Role;
 import com.example.sportsfacility_backend.entity.enums.UserStatus;
@@ -106,6 +107,37 @@ public class AuthController {
             return ResponseEntity.ok("Xác thực tài khoản thành công.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/social-login")
+    public ResponseEntity<?> socialLogin(@RequestBody SocialLoginRequest request) {
+        try {
+            // 1. Xử lý logic lưu/lấy user
+            User user = userService.processSocialLogin(request);
+
+            // 2. Kiểm tra trạng thái tài khoản
+            if (user.getStatus() == UserStatus.LOCKED) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Tài khoản đã bị khóa."));
+            }
+
+            // 3. Tạo JWT Token
+            String token = jwtService.generateToken(user);
+
+            // 4. Trả về response giống hệt login bình thường để Frontend dễ xử lý
+            LoginResponse response = new LoginResponse(
+                    user.getId(),
+                    token,
+                    user.getRole().name(),
+                    user.getFullName(),
+                    user.getPhone(),
+                    user.getAvatarUrl()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Lỗi đăng nhập mạng xã hội: " + e.getMessage()));
         }
     }
 

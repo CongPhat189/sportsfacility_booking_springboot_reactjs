@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register", "/auth/register/**", "/auth/login", "/auth/verify", "/ws/**",
-                                "/payments/vnpay/callback",
+                                "/payments/vnpay/callback","/auth/social-login",
                                 "/courts/search",
                                 "/courts/categories",
                                 "/courts/*/available-slots",
