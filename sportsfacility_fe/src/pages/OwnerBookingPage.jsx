@@ -62,9 +62,9 @@ const ConfirmModal = ({ confirm, onCancel, onOk }) => {
 
   const styles = {
     confirm: { icon: "✅", color: "bg-blue-500 hover:bg-blue-600", label: "Xác nhận" },
-    reject:  { icon: "❌", color: "bg-red-500 hover:bg-red-600",  label: "Từ chối" },
+    reject: { icon: "❌", color: "bg-red-500 hover:bg-red-600", label: "Từ chối" },
     checkin: { icon: "🏃", color: "bg-emerald-500 hover:bg-emerald-600", label: "Check-in" },
-    complete:{ icon: "🏆", color: "bg-purple-500 hover:bg-purple-600", label: "Hoàn thành" },
+    complete: { icon: "🏆", color: "bg-purple-500 hover:bg-purple-600", label: "Hoàn thành" },
   };
 
   const s = styles[confirm.type] || styles.confirm;
@@ -134,12 +134,12 @@ const OwnerBookingPage = () => {
   );
 
   const statusMap = {
-    PENDING:    { label: "Chờ xác nhận", cls: "bg-amber-50 text-amber-600" },
-    CONFIRMED:  { label: "Đã xác nhận",  cls: "bg-blue-50 text-blue-600" },
-    CHECKED_IN: { label: "Đã check-in",  cls: "bg-emerald-50 text-emerald-600" },
-    COMPLETED:  { label: "Hoàn thành", cls: "bg-green-100 text-green-600" },
-    CANCELLED:  { label: "Đã huỷ",       cls: "bg-red-50 text-red-500" },
-    EXPIRED:    { label: "Hết hạn",      cls: "bg-slate-100 text-slate-400" },
+    PENDING: { label: "Chờ xác nhận", cls: "bg-amber-50 text-amber-600" },
+    CONFIRMED: { label: "Đã xác nhận", cls: "bg-blue-50 text-blue-600" },
+    CHECKED_IN: { label: "Đã check-in", cls: "bg-emerald-50 text-emerald-600" },
+    COMPLETED: { label: "Hoàn thành", cls: "bg-green-100 text-green-600" },
+    CANCELLED: { label: "Đã huỷ", cls: "bg-red-50 text-red-500" },
+    EXPIRED: { label: "Hết hạn", cls: "bg-slate-100 text-slate-400" },
   };
 
   const renderStatus = (status) => {
@@ -172,35 +172,35 @@ const OwnerBookingPage = () => {
     );
   };
 
-const handleReject = (id) => {
-  showConfirm(
-    "reject",
-    "Từ chối booking?",
-    "Hành động này không thể hoàn tác. Khách hàng sẽ được thông báo.",
-    async () => {
-      hideConfirm();
-      try {
-        const res = await authAPIs().put(endpoints["reject-booking"](id));
+  const handleReject = (id) => {
+    showConfirm(
+      "reject",
+      "Từ chối booking?",
+      "Hành động này không thể hoàn tác. Khách hàng sẽ được thông báo.",
+      async () => {
+        hideConfirm();
+        try {
+          const res = await authAPIs().put(endpoints["reject-booking"](id));
 
-        // 🔥 FIX: kiểm tra status
-        if (res.status >= 200 && res.status < 300) {
-          showToast("success", "Đã từ chối", "Booking đã được từ chối thành công.");
-        } else {
-          throw new Error("Response không hợp lệ");
+          // 🔥 FIX: kiểm tra status
+          if (res.status >= 200 && res.status < 300) {
+            showToast("success", "Đã từ chối", "Booking đã được từ chối thành công.");
+          } else {
+            throw new Error("Response không hợp lệ");
+          }
+
+          loadBookings();
+        } catch (err) {
+          console.error("Reject error:", err);
+          showToast(
+            "error",
+            "Từ chối thất bại",
+            err.response?.data || err.message || "Vui lòng thử lại."
+          );
         }
-
-        loadBookings();
-      } catch (err) {
-        console.error("Reject error:", err);
-        showToast(
-          "error",
-          "Từ chối thất bại",
-          err.response?.data || err.message || "Vui lòng thử lại."
-        );
       }
-    }
-  );
-};
+    );
+  };
 
   const handleCheckin = (id) => {
     showConfirm(
@@ -240,53 +240,53 @@ const handleReject = (id) => {
     );
   };
 
-const renderActions = (b) => {
-  switch (b.status) {
-    case "PENDING":
-      return (
-        <div className="flex items-center gap-2">
+  const renderActions = (b) => {
+    switch (b.status) {
+      case "PENDING":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleReject(b.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
+            >
+              <XCircle className="w-3.5 h-3.5" /> Từ chối
+            </button>
+          </div>
+        );
+
+      case "CONFIRMED":
+        return (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleCheckin(b.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition"
+            >
+              <LogIn className="w-3.5 h-3.5" /> Check-in
+            </button>
+
+            <button
+              onClick={() => handleReject(b.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
+            >
+              <XCircle className="w-3.5 h-3.5" /> Từ chối
+            </button>
+          </div>
+        );
+
+      case "CHECKED_IN":
+        return (
           <button
-            onClick={() => handleReject(b.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
+            onClick={() => handleComplete(b.id)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-purple-500 hover:bg-purple-600 rounded-lg transition"
           >
-            <XCircle className="w-3.5 h-3.5" /> Từ chối
+            <Flag className="w-3.5 h-3.5" /> Hoàn thành
           </button>
-        </div>
-      );
+        );
 
-    case "CONFIRMED":
-      return (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleCheckin(b.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition"
-          >
-            <LogIn className="w-3.5 h-3.5" /> Check-in
-          </button>
-
-          <button
-            onClick={() => handleReject(b.id)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition"
-          >
-            <XCircle className="w-3.5 h-3.5" /> Từ chối
-          </button>
-        </div>
-      );
-
-    case "CHECKED_IN":
-      return (
-        <button
-          onClick={() => handleComplete(b.id)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-purple-500 hover:bg-purple-600 rounded-lg transition"
-        >
-          <Flag className="w-3.5 h-3.5" /> Hoàn thành
-        </button>
-      );
-
-    default:
-      return <span className="text-slate-300 text-xs">—</span>;
-  }
-};
+      default:
+        return <span className="text-slate-300 text-xs">—</span>;
+    }
+  };
 
   return (
     <>

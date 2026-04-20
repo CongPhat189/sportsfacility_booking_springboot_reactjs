@@ -131,7 +131,7 @@ export default function LoginPage() {
         </div>
         <div className="relative z-10 text-center text-white">
           <div className="text-6xl mb-6">🏟️</div>
-          <h1 className="text-4xl font-black mb-4">SportBooking</h1>
+          <h1 className="text-4xl font-black mb-4">Sports Arena</h1>
           <p className="text-green-100 text-lg leading-relaxed max-w-sm">
             Đặt sân thể thao dễ dàng, nhanh chóng. Tìm và đặt sân yêu thích chỉ trong vài bước.
           </p>

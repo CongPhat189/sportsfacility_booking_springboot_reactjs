@@ -15,17 +15,16 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-40">
       <span onClick={() => navigate('/')} className="text-xl font-black cursor-pointer">
-        SPORTS<span className="text-green-600">BOOK</span>
+        SPORTS<span className="text-green-600">ARENA</span>
       </span>
 
       <div className="flex items-center gap-8">
         {links.map(link => (
           <button key={link.path} onClick={() => navigate(link.path)}
-            className={`text-sm font-medium transition ${
-              location.pathname === link.path
+            className={`text-sm font-medium transition ${location.pathname === link.path
                 ? 'text-green-600 border-b-2 border-green-600 pb-0.5'
                 : 'text-gray-600 hover:text-green-600'
-            }`}>
+              }`}>
             {link.label}
           </button>
         ))}
