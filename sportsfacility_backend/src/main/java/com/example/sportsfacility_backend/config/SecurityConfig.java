@@ -48,7 +48,8 @@ public class SecurityConfig {
                                 "/courts/search",
                                 "/courts/categories",
                                 "/courts/*/available-slots",
-                                "/courts/**"
+                                "/courts/**",
+                                "/auth/social-login"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/owner/**").hasRole("OWNER")
