@@ -10,13 +10,19 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Service
 public class EmailService {
+
+    @Value("${app.backend-url}")
+    private String backendUrl;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -26,8 +32,7 @@ public class EmailService {
     //Xác thực tài khoản
     public void sendVerificationEmail(String toEmail, String token) {
         try {
-            String link = "http://localhost:8080/auth/verify?token=" + token;
-
+            String link = backendUrl + "/auth/verify?token=" + token;
 
             String template = new String(Files.readAllBytes(
                     Paths.get(new ClassPathResource("templates/verification_email.html").getURI())
@@ -43,7 +48,7 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Xác thực tài khoản trên hệ thống SportArena");
             helper.setText(content, true);
-            helper.setFrom("tpn18092004@gmail.com");
+            helper.setFrom("trungtiendoan22@gmail.com");
 
             mailSender.send(message);
         } catch (Exception e) {
@@ -59,7 +64,7 @@ public class EmailService {
 
         Context context = new Context();
         context.setVariable("courtName", courtName);
-        context.setVariable("link", "http://localhost:5173/owner/courts");
+        context.setVariable("link", frontendUrl + "/owner/courts");
         context.setVariable("fullName", fullName);
 
         String html = templateEngine.process("email/approve-court", context);

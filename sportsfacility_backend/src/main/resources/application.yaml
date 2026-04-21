@@ -3,26 +3,25 @@ spring:
     name: sportsfacility_backend
 
   datasource:
-    url: jdbc:mysql://localhost:3306/sportsfacility_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
-    password: Admin123
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        "[format_sql]": true
+        "[format_sql]": false
     open-in-view: false
-
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: tpn18092004@gmail.com
-    password: gtzgsmjcdzanimek
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -42,22 +41,26 @@ server:
   port: 8080
 
 jwt:
-  secret: oUwfZl+T7r7+Jw5bB65zW98Mt3jzYtPClpZ3aINxqVQ=
-  expiration: 86400000 # 24 hours in milliseconds
+  secret: ${JWT_SECRET}
+  expiration: 86400000
 
 cloudinary:
-  cloud-name: dwd4b8lcx
-  api-key: 271116451416351
-  api-secret: fbyd8zzUl4OSzBFxkf4_cr4jNTk
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 
 vnpay:
-  tmn-code: 63NUWGNE
-  hash-secret: C3NBM8MWADUJ1HDMU1KZ67YICMAD9BSJ
-  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-  return-url: http://localhost:8080/payments/vnpay/callback
+  tmn-code: ${VNPAY_TMN_CODE}
+  hash-secret: ${VNPAY_HASH_SECRET}
+  url: ${VNPAY_URL}
+  return-url: ${VNPAY_RETURN_URL}
 
 gemini:
   api:
-    key: AIzaSyBemCnDxXjYd99KCmpjbE2IGA7ZkhDXY-M
+    key: ${GEMINI_API_KEY}
     url: https://generativelanguage.googleapis.com/v1
     model: gemini-2.5-flash
+
+app:
+  frontend-url: ${FRONTEND_URL}
+  backend-url: ${BACKEND_URL}

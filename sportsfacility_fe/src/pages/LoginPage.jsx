@@ -219,7 +219,7 @@ export default function LoginPage() {
               Google
             </button>
             <FacebookLogin
-              appId="1687483312411632"
+              appId={import.meta.env.VITE_FACEBOOK_APP_ID}
               autoLoad={false}
               fields="name,email,picture"
               callback={responseFacebook}

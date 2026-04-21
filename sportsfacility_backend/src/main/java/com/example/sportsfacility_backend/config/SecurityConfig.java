@@ -1,6 +1,6 @@
 package com.example.sportsfacility_backend.config;
 
-
+import org.springframework.beans.factory.annotation.Value;
 import com.example.sportsfacility_backend.security.JwtFilter;
 import com.example.sportsfacility_backend.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +28,8 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     private final CustomUserDetailsService userDetailsService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public SecurityConfig(JwtFilter jwtFilter, CustomUserDetailsService userDetailsService) {
         this.jwtFilter = jwtFilter;
@@ -42,7 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register", "/auth/register/**", "/auth/login", "/auth/verify", "/ws/**",
-                                "/payments/vnpay/callback","/auth/social-login",
+                                "/payments/vnpay/callback",
                                 "/courts/search",
                                 "/courts/categories",
                                 "/courts/*/available-slots",
@@ -83,7 +85,7 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // frontend origin
+        config.setAllowedOriginPatterns(List.of("http://localhost:5173", frontendUrl, "https://*-*.vercel.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "uuidKey"));
         config.setExposedHeaders(List.of("Authorization"));

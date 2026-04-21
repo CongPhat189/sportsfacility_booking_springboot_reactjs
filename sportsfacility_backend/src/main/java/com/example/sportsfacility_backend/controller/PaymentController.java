@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     @PostMapping("/vnpay/create")
     public ResponseEntity<Map<String, String>> createPayment(
@@ -37,8 +40,8 @@ public class PaymentController {
             HttpServletResponse response) throws IOException {
         boolean success = paymentService.handleCallback(params);
         String redirectUrl = success
-                ? "http://localhost:5173/payment/success"
-                : "http://localhost:5173/payment/failed";
+                ? frontendUrl + "/payment/success"
+                : frontendUrl + "/payment/failed";
         response.sendRedirect(redirectUrl);
     }
 }
