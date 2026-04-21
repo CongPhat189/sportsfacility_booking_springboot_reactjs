@@ -199,19 +199,22 @@ const OwnerCourtPage = () => {
     setShowModal(true);
   };
 
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    if (selectedFiles.length === 0) return;
+    const handleFileChange = (e) => {
+      const selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length === 0) return;
 
-    // Giới hạn 3 file
-    const limitedFiles = selectedFiles.slice(0, 3);
-    setNewCourt({ ...newCourt, files: limitedFiles, imageUrl: "" });
+      const existing = newCourt.files || [];
+      const merged = [...existing, ...selectedFiles].slice(0, 3); 
+      const urls = merged.map(file =>
+        file instanceof File ? URL.createObjectURL(file) : file
+      );
 
-    // Tạo preview
-    const urls = limitedFiles.map(file => URL.createObjectURL(file));
-    setPreviewUrls(urls);
-    setErrors((prev) => ({ ...prev, image: false }));
+      setNewCourt({ ...newCourt, files: merged, imageUrl: "" });
+      setPreviewUrls(urls);
+      setErrors((prev) => ({ ...prev, image: false }));
+      if (fileInputRef.current) fileInputRef.current.value = ""; 
   };
+
 
   const handleUrlChange = (e) => {
     const url = e.target.value;

@@ -3,6 +3,7 @@ package com.example.sportsfacility_backend.service;
 
 import com.example.sportsfacility_backend.dto.ChangePasswordRequest;
 import com.example.sportsfacility_backend.dto.RegisterRequest;
+import com.example.sportsfacility_backend.dto.SocialLoginRequest;
 import com.example.sportsfacility_backend.dto.UpdateProfileRequest;
 import com.example.sportsfacility_backend.entity.User;
 import com.example.sportsfacility_backend.entity.enums.*;
@@ -126,6 +127,34 @@ public class UserService {
         userRepository.save(user);
 
         return "Đổi mật khẩu thành công";
+    }
+    public User processSocialLogin(SocialLoginRequest request) {
+        return userRepository.findByEmail(request.email())
+                .map(existingUser -> {
+                    // Nếu user đã có, cập nhật thông tin cơ bản
+                    existingUser.setFullName(request.fullName());
+                    existingUser.setAvatarUrl(request.avatarUrl());
+                    return userRepository.save(existingUser);
+                })
+                .orElseGet(() -> {
+                    // Tạo user mới hoàn toàn
+                    User newUser = new User();
+                    newUser.setEmail(request.email());
+                    newUser.setFullName(request.fullName());
+                    newUser.setAvatarUrl(request.avatarUrl());
+
+                    // --- PHẦN TỰ ĐIỀN PASSWORD NGẪU NHIÊN ---
+                    String randomPassword = UUID.randomUUID().toString();
+                    newUser.setPassword(new BCryptPasswordEncoder().encode(randomPassword));
+                    // ----------------------------------------
+
+                    newUser.setRole(Role.CUSTOMER);
+                    newUser.setVerified(true); // Social mặc định là true
+                    newUser.setStatus(UserStatus.ACTIVE);
+                    newUser.setCreatedAt(LocalDateTime.now()); // Đảm bảo đúng kiểu dữ liệu của project này
+
+                    return userRepository.save(newUser);
+                });
     }
 
 

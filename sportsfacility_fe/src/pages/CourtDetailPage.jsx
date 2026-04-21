@@ -145,34 +145,61 @@ export default function CourtDetailPage() {
             <ChevronLeft className="w-4 h-4" /> Quay lại danh sách sân
           </button>
           {/* Image Gallery */}
-          <div className="relative h-[420px] mb-4 overflow-hidden rounded-2xl">
-            <img
-              src={court.imageUrl || 'https://placehold.co/1200x420?text=No+Image'}
-              alt={court.name}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 text-white">
-              <h1 className="text-3xl font-black">{court.name}</h1>
-              <p className="flex items-center gap-1 text-sm mt-1 opacity-90">
-                <MapPin className="w-3.5 h-3.5" /> {court.address}
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-2 flex items-center gap-1 underline hover:text-green-300"
-                  title="Xem trên Google Maps"
-                >
-                  <Map className="w-3.5 h-3.5" /> Xem bản đồ
-                </a>
-              </p>
-            </div>
-            {avgRating && (
-              <div className="absolute bottom-4 right-4 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                ★ {avgRating}
+          {(() => {
+            const images = court.imageUrl
+              ? court.imageUrl.split(",").map(u => u.trim()).filter(Boolean)
+              : [];
+            const placeholder = 'https://placehold.co/1200x420?text=No+Image';
+
+            return (
+              <div className="relative h-[420px] mb-4 rounded-2xl overflow-hidden">
+                {images.length <= 1 ? (
+                  <img
+                    src={images[0] || placeholder}
+                    alt={court.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : images.length === 2 ? (
+                  <div className="grid grid-cols-2 gap-1 h-full">
+                    {images.map((src, i) => (
+                      <img key={i} src={src} alt={`${court.name} ${i + 1}`} className="w-full h-full object-cover" />
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gridTemplateRows: '1fr 1fr', height: '100%', gap: '4px' }}>
+                    <img src={images[0]} alt={`${court.name} 1`} style={{ gridRow: '1 / 3', width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ overflow: 'hidden', minHeight: 0 }}>
+                      <img src={images[1]} alt={`${court.name} 2`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
+                    <div style={{ overflow: 'hidden', minHeight: 0 }}>
+                      <img src={images[2]} alt={`${court.name} 3`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </div>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 text-white">
+                  <h1 className="text-3xl font-black">{court.name}</h1>
+                  <p className="flex items-center gap-1 text-sm mt-1 opacity-90">
+                    <MapPin className="w-3.5 h-3.5" /> {court.address}
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(court.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-2 flex items-center gap-1 underline hover:text-green-300"
+                      title="Xem trên Google Maps"
+                    >
+                      <Map className="w-3.5 h-3.5" /> Xem bản đồ
+                    </a>
+                  </p>
+                </div>
+                {avgRating && (
+                  <div className="absolute bottom-4 right-4 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                    ★ {avgRating}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
           {/* Amenities */}
           <div className="flex gap-6 py-4 border-b mb-8">
             {amenities.map((a, i) => (

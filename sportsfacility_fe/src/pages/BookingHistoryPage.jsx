@@ -143,7 +143,7 @@ export default function BookingHistoryPage() {
                 {/* Ảnh + badge */}
                 <div className="relative w-44 flex-shrink-0">
                   <img
-                    src={b.courtImageUrl || 'https://placehold.co/200x200?text=No+Image'}
+                    src={b.courtImageUrl ? b.courtImageUrl.split(",")[0].trim() : 'https://placehold.co/200x200?text=No+Image'}
                     alt={b.courtName}
                     className="w-full h-full object-cover"
                   />
