@@ -4,7 +4,7 @@ import { toast } from 'react-toastify'
 import axios, { endpoints } from '../config/APIs'
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '', phone: '' })
+  const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '', phone: '', role: 'CUSTOMER' })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -23,7 +23,7 @@ export default function RegisterPage() {
       formData.append('email', form.email)
       formData.append('password', form.password)
       formData.append('phone', form.phone)
-      formData.append('role', 'CUSTOMER')
+      formData.append('role', form.role)
 
       await axios.post(endpoints['register'], formData)
       toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác thực.')
@@ -137,6 +137,24 @@ export default function RegisterPage() {
               {form.confirmPassword && form.password !== form.confirmPassword && (
                 <p className="text-red-500 text-xs mt-1">Không khớp</p>
               )}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-gray-700 mb-2 block">Đăng ký với tư cách</label>
+            <div className="grid grid-cols-2 gap-3">
+              {[{ value: 'CUSTOMER', label: '🏃 Khách hàng' }, { value: 'OWNER', label: '🏟️ Chủ sân' }].map(r => (
+                <button key={r.value} type="button"
+                  onClick={() => setForm({ ...form, role: r.value })}
+                  className={`py-3 rounded-xl font-semibold border-2 transition ${
+                    form.role === r.value
+                      ? 'border-green-500 bg-green-50 text-green-700'
+                      : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
             </div>
           </div>
 

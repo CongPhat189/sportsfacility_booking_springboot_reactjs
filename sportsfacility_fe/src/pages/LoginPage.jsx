@@ -11,7 +11,7 @@ import standardAxios from "axios"; // Đổi tên để không trùng với file
 // -------------------------------------
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '', role: 'CUSTOMER' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -173,19 +173,6 @@ export default function LoginPage() {
                   {showPassword ? '🙈' : '👁️'}
                 </button>
               </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Đăng nhập với tư cách</label>
-              <select
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-400 bg-gray-50"
-                value={form.role}
-                onChange={e => setForm({ ...form, role: e.target.value })}
-              >
-                <option value="CUSTOMER">Khách hàng</option>
-                <option value="OWNER">Chủ sân</option>
-                <option value="ADMIN">Quản trị viên</option>
-              </select>
             </div>
 
             <button
