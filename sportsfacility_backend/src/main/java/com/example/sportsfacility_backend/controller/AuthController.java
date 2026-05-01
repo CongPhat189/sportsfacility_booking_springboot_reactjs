@@ -77,19 +77,7 @@ public class AuthController {
             }
 
 
-            // 5. Kiểm tra vai trò
-            Role expectedRole;
-            try {
-                expectedRole = request.getRole();
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body("Vai trò không hợp lệ.");
-            }
-
-            if (user.getRole() != expectedRole) {
-                return ResponseEntity.badRequest().body("Bạn không thuộc vai trò: " + request.getRole());
-            }
-
-            // 7. Trả về JWT token
+            // 5. Trả về JWT token
             String token = jwtService.generateToken(user);
             LoginResponse response = new LoginResponse(user.getId(),token, user.getRole().name(), user.getFullName(), user.getPhone(), user.getAvatarUrl());
 
