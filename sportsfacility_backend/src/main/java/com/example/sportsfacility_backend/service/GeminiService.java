@@ -26,8 +26,8 @@ public class GeminiService {
     // ===== Constructor với timeout =====
     public GeminiService() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000);
-        factory.setReadTimeout(10000);
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(60000);
         this.restTemplate = new RestTemplate(factory);
     }
 
@@ -63,11 +63,6 @@ public class GeminiService {
                     request,
                     Map.class
             );
-
-            // Debug (có thể xóa sau)
-            // System.out.println(response.getBody());
-
-            // ===== Parse response =====
             return extractText(response.getBody());
 
         } catch (Exception e) {
@@ -76,7 +71,7 @@ public class GeminiService {
         }
     }
 
-    // ===== Parse JSON Gemini =====
+
     private String extractText(Map<String, Object> body) {
         try {
             if (body == null) return "AI không phản hồi";

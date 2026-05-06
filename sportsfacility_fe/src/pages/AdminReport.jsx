@@ -90,7 +90,7 @@ const AdminReport = () => {
         { label: "Chờ xử lý", value: pending, sub: `${pct(pending)}% tổng booking`, dotColor: "#f59e0b" },
         { label: "Hoàn thành", value: completed, sub: `${pct(completed)}% tổng booking`, dotColor: "#10b981" },
         { label: "Đã huỷ", value: cancelled, sub: `${pct(cancelled)}% tổng booking`, dotColor: "#ef4444" },
-        { label: "Doanh thu", value: totalRevenue.toLocaleString("vi-VN") + " ₫", sub: "Doanh thu cao nhất trong 3 tháng", dotColor: "#3b82f6" },
+        { label: "Doanh thu", value: totalRevenue.toLocaleString("vi-VN") + " ₫", sub: "Doanh thu 3 tháng qua", dotColor: "#3b82f6" },
     ];
 
     /* ── custom doughnut label ── */
